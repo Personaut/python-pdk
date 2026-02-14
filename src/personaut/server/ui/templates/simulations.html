@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+{% block title %}Simulations — Personaut{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/css/simulations.css">
+{% endblock %}
+
+{% block content %}
+<div class="sim-hero">
+    <h1>🧪 Simulations</h1>
+    <p class="subtitle">Run conversations between simulants or survey your individuals</p>
+    <div class="llm-badge">
+        <span class="llm-dot {{ 'active' if llm_model else 'inactive' }}"></span>
+        {{ llm_model or 'No LLM — fallback mode' }}
+    </div>
+</div>
+
+<!-- Simulation History -->
+{% if sim_history %}
+<div class="history-panel" id="history-panel">
+    <div class="history-header" onclick="toggleHistory()">
+        <h2>📜 Simulation History <span class="history-count">{{ sim_history|length }}</span></h2>
+        <span class="history-toggle" id="history-toggle">▼</span>
+    </div>
+    <div class="history-list" id="history-list">
+        {% for sim in sim_history %}
+        <div class="history-item" id="hist-{{ sim.id }}" data-sim-id="{{ sim.id }}">
+            <div class="history-icon">
+                {% if sim.mode == 'conversation' %}💬{% elif sim.mode == 'survey' %}📋{% elif sim.mode == 'outcome'
+                %}🎯{% else %}🧪{% endif %}
+            </div>
+            <div class="history-info">
+                <div class="history-title">{{ sim.title }}</div>
+                <div class="history-meta">{{ sim.summary }} · {{ sim.created_at[:16] | replace('T', ' ') }}</div>
+            </div>
+            <div class="history-actions">
+                <button class="history-replay-btn" onclick="event.stopPropagation(); replaySimulation('{{ sim.id }}')"
+                    title="View results">
+                    ▶
+                </button>
+                <button class="history-delete-btn" onclick="event.stopPropagation(); deleteSimulation('{{ sim.id }}')"
+                    title="Delete">
+                    ✕
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Mode Selection -->
+<div class="mode-grid">
+    <div class="mode-card" id="mode-conversation" onclick="selectMode('conversation')">
+        <div class="icon">💬</div>
+        <h3>Conversation Simulation</h3>
+        <p>Generate multi-turn dialogues between two or more individuals. Each character stays in-character based on
+            their personality traits, emotions, and speaking style.</p>
+        <div class="badge-row">
+            <span class="mode-badge">2+ Individuals</span>
+            <span class="mode-badge">Multi-turn</span>
+            <span class="mode-badge">LLM-Powered</span>
+        </div>
+    </div>
+    <div class="mode-card" id="mode-survey" onclick="selectMode('survey')">
+        <div class="icon">📋</div>
+        <h3>Survey Simulation</h3>
+        <p>Generate persona-driven survey responses. Each individual answers questions based on their emotional state,
+            personality traits, and background.</p>
+        <div class="badge-row">
+            <span class="mode-badge">1+ Individuals</span>
+            <span class="mode-badge">Multiple Q Types</span>
+            <span class="mode-badge">Personality-Driven</span>
+        </div>
+    </div>
+    <div class="mode-card" id="mode-outcome" onclick="selectMode('outcome')">
+        <div class="icon">🎯</div>
+        <h3>Outcome Tracking</h3>
+        <p>Test how different personality types respond to a scenario with a target outcome. Generate randomized
+            personas and track success rates to find which traits drive results.</p>
+        <div class="badge-row">
+            <span class="mode-badge">Auto-Generated Personas</span>
+            <span class="mode-badge">Success Tracking</span>
+            <span class="mode-badge">Trait Correlation</span>
+        </div>
+    </div>
+</div>
+
+<!-- Conversation Config -->
+<div class="sim-config" id="config-conversation">
+    <div class="config-title">💬 Configure Conversation</div>
+
+    <div class="form-group">
+        <label>Participants</label>
+        <div class="participant-area" id="conv-participants">
+            <span class="empty-hint" id="conv-empty-hint">Add 2+ individuals to start…</span>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="conv-add-individual">Add Individual</label>
+            <select id="conv-add-individual" class="form-control">
+                <option value="">— Select —</option>
+                {% for ind in individuals %}
+                <option value="{{ ind.id }}">{{ ind.name }} ({{ ind.individual_type or 'simulated' }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn-secondary" onclick="addParticipant('conv')">+ Add</button>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="conv-situation">Situation</label>
+            <select id="conv-situation" class="form-control">
+                <option value="">— None (casual conversation) —</option>
+                {% for sit in situations %}
+                <option value="{{ sit.id }}">{{ sit.name or sit.description }} ({{ sit.modality }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="conv-turns">Max Turns</label>
+            <select id="conv-turns" class="form-control">
+                <option value="6">6 turns</option>
+                <option value="10" selected>10 turns</option>
+                <option value="16">16 turns</option>
+                <option value="24">24 turns</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="conv-variations">Variations</label>
+            <select id="conv-variations" class="form-control">
+                <option value="1" selected>1 variation</option>
+                <option value="2">2 variations</option>
+                <option value="3">3 variations</option>
+                <option value="5">5 variations</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="run-btn" id="run-conversation" onclick="runSimulation('conversation')" disabled>
+        <span class="spinner"></span>
+        <span class="btn-text">▶ Run Conversation</span>
+    </button>
+</div>
+
+<!-- Survey Config -->
+<div class="sim-config" id="config-survey">
+    <div class="config-title">📋 Configure Survey</div>
+
+    <div class="form-group">
+        <label>Respondents</label>
+        <div class="participant-area" id="survey-participants">
+            <span class="empty-hint" id="survey-empty-hint">Add 1+ individuals as respondents…</span>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="survey-add-individual">Add Respondent</label>
+            <select id="survey-add-individual" class="form-control">
+                <option value="">— Select —</option>
+                {% for ind in individuals %}
+                <option value="{{ ind.id }}">{{ ind.name }} ({{ ind.individual_type or 'simulated' }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn-secondary" onclick="addParticipant('survey')">+ Add</button>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="survey-situation">Situation / Context</label>
+        <select id="survey-situation" class="form-control">
+            <option value="">— None —</option>
+            {% for sit in situations %}
+            <option value="{{ sit.id }}">{{ sit.name or sit.description }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Product Image <span style="font-weight:400;color:var(--text-muted);">(optional — shown to
+                respondents)</span></label>
+        <div id="survey-image-area"
+            style="border:2px dashed var(--border);border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.3s;background:var(--primary-bg);"
+            onclick="document.getElementById('survey-image-input').click()">
+            <input type="file" id="survey-image-input" accept="image/*" style="display:none"
+                onchange="handleImageUpload(event)">
+            <div id="survey-image-placeholder" style="color:var(--text-muted);">
+                <div style="font-size:2rem;margin-bottom:0.5rem;">📷</div>
+                <div>Click or drag to upload a product image</div>
+                <div style="font-size:0.8rem;margin-top:0.3rem;">PNG, JPG, WebP — max 4MB</div>
+            </div>
+            <div id="survey-image-preview" style="display:none;">
+                <img id="survey-image-thumb"
+                    style="max-width:300px;max-height:200px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                <div style="margin-top:0.5rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+                    <span id="survey-image-name" style="font-size:0.85rem;color:var(--text-secondary);"></span>
+                    <button type="button" onclick="event.stopPropagation();clearImage()"
+                        style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:#e74c3c;">✕</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="survey-image-desc">Product Description <span
+                style="font-weight:400;color:var(--text-muted);">(optional — helps ground responses)</span></label>
+        <input type="text" id="survey-image-desc" class="form-control"
+            placeholder="e.g., Premium wireless earbuds, $149, noise-cancelling">
+    </div>
+
+    <div class="form-group">
+        <label>Questions</label>
+        <div class="question-list" id="question-list"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="q-text">Question Text</label>
+            <input type="text" id="q-text" class="form-control"
+                placeholder="e.g., How do you feel about your work-life balance?">
+        </div>
+        <div class="form-group" style="max-width: 180px;">
+            <label for="q-type">Type</label>
+            <select id="q-type" class="form-control">
+                <option value="open_ended">Open-ended</option>
+                <option value="likert_5">Likert (1-5)</option>
+                <option value="likert_7">Likert (1-7)</option>
+                <option value="yes_no">Yes / No</option>
+                <option value="multiple_choice">Multiple Choice</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn-secondary" onclick="addQuestion()">+ Add Question</button>
+        </div>
+    </div>
+    <div class="form-group" id="mc-options-group" style="display:none;">
+        <label for="mc-options">Options (comma-separated)</label>
+        <input type="text" id="mc-options" class="form-control" placeholder="e.g., Option A, Option B, Option C">
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="survey-variations">Variations</label>
+            <select id="survey-variations" class="form-control">
+                <option value="1" selected>1 variation</option>
+                <option value="2">2 variations</option>
+                <option value="3">3 variations</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="run-btn" id="run-survey" onclick="runSimulation('survey')" disabled>
+        <span class="spinner"></span>
+        <span class="btn-text">▶ Run Survey</span>
+    </button>
+</div>
+
+<!-- Outcome Tracking Config -->
+<div class="sim-config" id="config-outcome">
+    <div class="config-title">🎯 Configure Outcome Tracking</div>
+
+    <div class="form-group">
+        <label for="outcome-context">Scenario Context</label>
+        <textarea id="outcome-context" class="form-control" rows="3"
+            placeholder="e.g., You are a sales representative for Acme SaaS, a premium project management tool that costs $49/month. The customer contacted you through your website's chat widget after viewing the pricing page."></textarea>
+        <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+            Define the consistent background for all trials. This ensures every conversation shares the same product,
+            service, setting, and context.
+        </small>
+    </div>
+
+    <div class="form-group">
+        <label for="outcome-desc">Target Outcome</label>
+        <textarea id="outcome-desc" class="form-control" rows="2"
+            placeholder="e.g., Customer agrees to purchase the premium subscription"></textarea>
+        <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+            The specific measurable outcome you want the agent to achieve.
+        </small>
+    </div>
+
+    <div class="form-group">
+        <label for="outcome-agent">Agent / First Speaker</label>
+        <select id="outcome-agent" class="form-control">
+            <option value="">— Select the agent pursuing the outcome —</option>
+            {% for ind in individuals %}
+            <option value="{{ ind.id }}">{{ ind.name }} ({{ ind.individual_type or 'simulated' }})</option>
+            {% endfor %}
+        </select>
+        <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+            This individual will try to achieve the outcome. Random personas will be generated as the other participant.
+        </small>
+    </div>
+
+    <div class="form-group">
+        <label>Vary By <small style="font-weight:400;color:var(--text-muted);">(randomize one, control the other
+                two)</small></label>
+        <div class="vary-by-options">
+            <label class="vary-option active" id="vary-opt-traits">
+                <input type="radio" name="vary_by" value="traits" checked onchange="updateVaryBy(this.value)">
+                <span class="vary-icon">🧬</span>
+                <span class="vary-label">Personality Traits</span>
+                <span class="vary-desc">Randomize 17 personality traits</span>
+            </label>
+            <label class="vary-option" id="vary-opt-emotions">
+                <input type="radio" name="vary_by" value="emotions" onchange="updateVaryBy(this.value)">
+                <span class="vary-icon">💭</span>
+                <span class="vary-label">Emotional State</span>
+                <span class="vary-desc">Randomize starting emotions</span>
+            </label>
+            <label class="vary-option" id="vary-opt-situation">
+                <input type="radio" name="vary_by" value="situation" onchange="updateVaryBy(this.value)">
+                <span class="vary-icon">📍</span>
+                <span class="vary-label">Situation</span>
+                <span class="vary-desc">Randomize modality &amp; location</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group" id="outcome-situation-group">
+            <label for="outcome-situation">Situation <small id="outcome-sit-note"
+                    style="font-weight:400;color:var(--text-muted);display:none;">(controlled)</small></label>
+            <select id="outcome-situation" class="form-control">
+                <option value="">— None (casual conversation) —</option>
+                {% for sit in situations %}
+                <option value="{{ sit.id }}">{{ sit.name or sit.description }} ({{ sit.modality }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="outcome-turns">Turns per Trial</label>
+            <select id="outcome-turns" class="form-control">
+                <option value="6" selected>6 turns</option>
+                <option value="8">8 turns</option>
+                <option value="10">10 turns</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="outcome-trials">Number of Trials</label>
+            <select id="outcome-trials" class="form-control">
+                <option value="3">3 trials</option>
+                <option value="5" selected>5 trials</option>
+                <option value="8">8 trials</option>
+                <option value="10">10 trials</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="run-btn" id="run-outcome" onclick="runSimulation('outcome')" disabled>
+        <span class="spinner"></span>
+        <span class="btn-text">🎯 Run Outcome Trials</span>
+    </button>
+</div>
+
+<!-- Results -->
+<div class="results-area" id="results-area"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const individualsData = {{ individuals_json | safe }};
+    const situationsData = {{ situations_json | safe }};
+    const simHistoryData = {{ sim_history_json | safe }};
+</script>
+<script src="/static/js/simulations.js"></script>
+{% endblock %}

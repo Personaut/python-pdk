@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Relationships - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1>Relationships</h1>
+        <p class="subtitle">Manage connections</p>
+    </div>
+    <a href="{{ url_for('relationships.create_view') }}" class="btn btn-primary">🤝 New</a>
+</header>
+<p class="empty-state">No relationships yet.</p>
+{% endblock %}

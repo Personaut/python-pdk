@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Individual Not Found - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>Individual Not Found</h1>
+    <p class="subtitle">ID: {{ id }}</p>
+</header>
+<p class="empty-state">Individual not found.</p>
+<a href="{{ url_for('individuals.list_view') }}" class="btn btn-secondary">← Back to list</a>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}New Chat Session — Personaut{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-content">
+        <h1>New Chat Session</h1>
+    </div>
+</div>
+<form method="POST" class="form-container" id="new-session-form">
+    <div class="fg">
+        <label>Select Individual</label>
+        <select name="individual" required>
+            <option value="">Choose an individual...</option>
+            {% for ind in individuals %}
+            <option value="{{ ind.id }}">{{ ind.name }} ({{ ind.individual_type }})</option>
+            {% endfor %}
+        </select>
+        {% if not individuals %}
+        <p class="form-help">No individuals yet. <a href="/individuals/create">Create one first</a>.</p>
+        {% endif %}
+    </div>
+    <div class="fg">
+        <label>Select Situation</label>
+        <select name="situation" required>
+            <option value="">Choose a situation...</option>
+            {% for sit in situations %}
+            <option value="{{ sit.id }}">{{ sit.description[:60] }} ({{ sit.modality }})</option>
+            {% endfor %}
+        </select>
+        {% if not situations %}
+        <p class="form-help">No situations yet. <a href="/situations/create">Create one first</a>.</p>
+        {% endif %}
+    </div>
+    <div class="fg">
+        <label>Who Are You? (speaker profile)</label>
+        <select name="speaker_profile" id="speaker-profile-select" onchange="toggleNewProfile()">
+            {% for p in profiles %}
+            <option value="{{ p.id }}">{{ p.title }}</option>
+            {% endfor %}
+            <option value="__new__">➕ Create New Profile...</option>
+        </select>
+        <div id="speaker-profile-preview" class="profile-preview"></div>
+    </div>
+    <div id="new-profile-fields" style="display:none">
+        <div class="fg">
+            <label>Profile Title</label>
+            <input type="text" name="new_speaker_title" placeholder="e.g. Coffee Shop Manager, Sarah's Best Friend...">
+        </div>
+        <div class="fg">
+            <label>Context (who are you and what's your relationship?)</label>
+            <textarea name="new_speaker_context" rows="3"
+                placeholder="e.g. You're Sarah's boss. You've managed this cafe for 3 years. You're checking in on her shift."></textarea>
+        </div>
+    </div>
+    <div class="form-actions">
+        <a href="/chat" class="btn btn-secondary">Cancel</a>
+        <button class="btn btn-primary" {% if not individuals or not situations %}disabled{% endif %}>Start
+            Chat</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script>
+    const profiles = {{ profiles_json| safe }};
+    toggleNewProfile();
+</script>
+{% endblock %}

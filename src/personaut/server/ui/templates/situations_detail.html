@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ label }} - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1>{{ icon }} {{ label }}</h1>
+    </div>
+    <div style="display:flex;gap:0.75rem">
+        <a href="{{ url_for('situations.edit_view', id=sit.id) }}" class="btn btn-secondary">✏️ Edit</a>
+        <a href="{{ url_for('chat.select_session') }}?situation={{ sit.id }}" class="btn btn-primary">💬 Use in Chat</a>
+    </div>
+</header>
+
+{# Modality hero #}
+<div class="modality-hero">
+    <div class="icon">{{ icon }}</div>
+    <div class="info">
+        <h2>{{ label }}</h2>
+        {% if mod_info %}
+        <p>{{ mod_info.desc }}</p>
+        <div class="traits-row" style="margin-top:0.5rem">
+            {% if mod_info.sync %}<span class="trait-chip yes">⚡ Synchronous</span>{% else %}<span
+                class="trait-chip no">📨 Asynchronous</span>{% endif %}
+            {% if mod_info.visual %}<span class="trait-chip yes">👁 Visual cues</span>{% endif %}
+            {% if mod_info.audio %}<span class="trait-chip yes">🔊 Audio cues</span>{% endif %}
+            <span class="trait-chip" style="background:rgba(168,85,247,0.15);color:#c084fc">📐 {{ mod_info.formality
+                }}</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="detail-grid">
+    {# Description #}
+    <section class="detail-section">
+        <h2>Description</h2>
+        <p>{{ sit.description or 'No description provided' }}</p>
+    </section>
+
+    {# Location #}
+    {% if sit.location %}
+    <section class="detail-section">
+        <h2>📍 Location</h2>
+        <p>{{ sit.location }}</p>
+    </section>
+    {% endif %}
+
+    {# Context #}
+    {% if sit.context %}
+    <section class="detail-section">
+        <h2>🌤️ Situational Context</h2>
+        <div class="meta-grid">
+            {% for key, value in sit.context.items() %}
+            <div class="meta-item">
+                <span class="meta-key">{{ key.replace('_', ' ') }}</span>
+                <span class="meta-val">{{ value }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<div style="margin-top: 1.5rem">
+    <a href="{{ url_for('situations.list_view') }}" class="btn btn-secondary">← Back to list</a>
+</div>
+{% endblock %}

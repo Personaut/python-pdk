@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}Edit: {{ ind.name }} - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>Edit: {{ ind.name }}</h1>
+    <p class="subtitle">Update personality, emotions &amp; background</p>
+</header>
+<form method="POST" class="form-container">
+
+    {# ── Basic Info ── #}
+    <div class="form-section">
+        <div class="section-header" onclick="toggleSection('sec-basic')">
+            <h3>👤 Basic Information</h3>
+            <span class="toggle">▲</span>
+        </div>
+        <div class="section-body open" id="sec-basic">
+            <div class="form-group">
+                <label for="name">Name *</label>
+                <input type="text" id="name" name="name" required value="{{ ind.name }}">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3">{{ ind.description or '' }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    {# ── Background / Metadata ── #}
+    <div class="form-section">
+        <div class="section-header" onclick="toggleSection('sec-meta')">
+            <h3>📋 Background &amp; Context</h3>
+            <span class="toggle">▲</span>
+        </div>
+        <div class="section-body open" id="sec-meta">
+            {% for key, label, placeholder, input_type in metadata_fields %}
+            <div class="form-group">
+                <label for="meta_{{ key }}">{{ label }}</label>
+                <input type="{{ input_type }}" id="meta_{{ key }}" name="meta_{{ key }}" placeholder="{{ placeholder }}"
+                    value="{{ current_metadata.get(key, '') }}">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {# ── Physical Features ── #}
+    <div class="form-section">
+        <div class="section-header" onclick="toggleSection('sec-physical')">
+            <h3>🧍 Physical Features</h3>
+            <span class="toggle">{% if current_physical %}▲{% else %}▼{% endif %}</span>
+        </div>
+        <div class="section-body{% if current_physical %} open{% endif %}" id="sec-physical">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                <div class="form-group">
+                    <label for="phys_age_appearance">Age Appearance</label>
+                    <input type="text" id="phys_age_appearance" name="phys_age_appearance" placeholder="e.g. mid-30s"
+                        value="{{ current_physical.get('age_appearance', '') }}">
+                </div>
+                <div class="form-group">
+                    <label for="phys_height">Height</label>
+                    <input type="text" id="phys_height" name="phys_height" placeholder="e.g. 5'10&quot;"
+                        value="{{ current_physical.get('height', '') }}">
+                </div>
+                <div class="form-group">
+                    <label for="phys_build">Build</label>
+                    <input type="text" id="phys_build" name="phys_build" placeholder="e.g. athletic"
+                        value="{{ current_physical.get('build', '') }}">
+                </div>
+                <div class="form-group">
+                    <label for="phys_hair">Hair</label>
+                    <input type="text" id="phys_hair" name="phys_hair" placeholder="e.g. short dark curly"
+                        value="{{ current_physical.get('hair', '') }}">
+                </div>
+                <div class="form-group">
+                    <label for="phys_eyes">Eyes</label>
+                    <input type="text" id="phys_eyes" name="phys_eyes" placeholder="e.g. brown"
+                        value="{{ current_physical.get('eyes', '') }}">
+                </div>
+                <div class="form-group">
+                    <label for="phys_skin_tone">Skin Tone</label>
+                    <input type="text" id="phys_skin_tone" name="phys_skin_tone" placeholder="e.g. olive"
+                        value="{{ current_physical.get('skin_tone', '') }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="phys_facial_features">Facial Features</label>
+                <input type="text" id="phys_facial_features" name="phys_facial_features"
+                    placeholder="e.g. sharp jawline, dimples" value="{{ current_physical.get('facial_features', '') }}">
+            </div>
+            <div class="form-group">
+                <label for="phys_distinguishing_features">Distinguishing Features</label>
+                <input type="text" id="phys_distinguishing_features" name="phys_distinguishing_features"
+                    placeholder="Comma-separated"
+                    value="{{ current_physical.get('distinguishing_features', [])|join(', ') }}">
+            </div>
+            <div class="form-group">
+                <label for="phys_clothing_style">Clothing Style</label>
+                <input type="text" id="phys_clothing_style" name="phys_clothing_style"
+                    placeholder="e.g. business casual" value="{{ current_physical.get('clothing_style', '') }}">
+            </div>
+            <div class="form-group">
+                <label for="phys_accessories">Accessories</label>
+                <input type="text" id="phys_accessories" name="phys_accessories" placeholder="Comma-separated"
+                    value="{{ current_physical.get('accessories', [])|join(', ') }}">
+            </div>
+            <div class="form-group">
+                <label for="phys_other">Other</label>
+                <input type="text" id="phys_other" name="phys_other" placeholder="Anything else"
+                    value="{{ current_physical.get('other', '') }}">
+            </div>
+        </div>
+    </div>
+
+    {# ── Trait Profile ── #}
+    <div class="form-section">
+        <div class="section-header" onclick="toggleSection('sec-traits')">
+            <h3>🧠 Personality Traits</h3>
+            <span class="toggle">▲</span>
+        </div>
+        <div class="section-body open" id="sec-traits">
+            <div class="slider-grid">
+                {% for trait in traits %}
+                {% set val = (current_traits.get(trait, 0.5) * 100)|int %}
+                <div class="slider-item">
+                    <div class="slider-label">
+                        <span class="trait-name">{{ trait_labels[trait][0] }}</span>
+                        <span class="trait-hint">{{ trait_labels[trait][1] }}</span>
+                    </div>
+                    <input type="range" name="trait_{{ trait }}" min="0" max="100" value="{{ val }}">
+                    <span class="slider-value">{{ val }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {# ── Emotional State ── #}
+    <div class="form-section">
+        <div class="section-header" onclick="toggleSection('sec-emotions')">
+            <h3>💛 Emotional State</h3>
+            <span class="toggle">▼</span>
+        </div>
+        <div class="section-body" id="sec-emotions">
+            <div class="slider-grid">
+                {% for emotion in all_emotions %}
+                {% set val = (current_emotions.get(emotion, 0.0) * 100)|int %}
+                <div class="slider-item">
+                    <div class="slider-label">
+                        <span class="trait-name">{{ emotion|capitalize }}</span>
+                    </div>
+                    <input type="range" name="emotion_{{ emotion }}" min="0" max="100" value="{{ val }}">
+                    <span class="slider-value">{{ val }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="{{ url_for('individuals.detail_view', id=ind.id) }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Live slider value updates
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+        const display = slider.parentElement.querySelector('.slider-value');
+        if (display) {
+            slider.addEventListener('input', () => { display.textContent = slider.value + '%'; });
+        }
+    });
+
+    // Section toggle
+    function toggleSection(id) {
+        const body = document.getElementById(id);
+        const toggle = body.previousElementSibling.querySelector('.toggle');
+        body.classList.toggle('open');
+        toggle.textContent = body.classList.contains('open') ? '▲' : '▼';
+    }
+</script>
+{% endblock %}

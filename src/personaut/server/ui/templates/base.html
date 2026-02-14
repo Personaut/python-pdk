@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Personaut{% endblock %}</title>
+    <meta name="description" content="{% block description %}Personaut - AI Persona Development Kit{% endblock %}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="brand-icon">🎭</span>
+            <a href="{{ url_for('dashboard.index') }}" class="brand-text">Personaut</a>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard.index') }}"
+                class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}">Dashboard</a>
+            <a href="{{ url_for('individuals.list_view') }}"
+                class="nav-link {% if 'individuals' in request.endpoint %}active{% endif %}">Individuals</a>
+            <a href="{{ url_for('situations.list_view') }}"
+                class="nav-link {% if 'situations' in request.endpoint %}active{% endif %}">Situations</a>
+            <a href="{{ url_for('relationships.list_view') }}"
+                class="nav-link {% if 'relationships' in request.endpoint %}active{% endif %}">Relationships</a>
+            <a href="{{ url_for('chat.select_session') }}"
+                class="nav-link {% if 'chat' in request.endpoint %}active{% endif %}">Chat</a>
+            <a href="{{ url_for('simulations.index') }}"
+                class="nav-link {% if 'simulations' in request.endpoint %}active{% endif %}">Simulations</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Personaut PDK &copy; {{ now.year if now else 2026 }} | <a href="/api/docs">API Docs</a></p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ individual.name }} - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div class="header-content">
+        <h1>Edit Individual</h1>
+        <p class="subtitle">{{ individual.name }}</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('individuals.detail_view', id=individual.id) }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</header>
+
+<form method="POST" class="form-container">
+    <div class="form-section">
+        <h3>Basic Information</h3>
+
+        <div class="form-group">
+            <label for="name">Name *</label>
+            <input type="text" id="name" name="name" value="{{ individual.name }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="3">{{ individual.description or '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="individual_type">Type</label>
+            <select id="individual_type" name="individual_type">
+                <option value="simulated" {% if individual.individual_type=='simulated' %}selected{% endif %}>Simulated
+                </option>
+                <option value="human" {% if individual.individual_type=='human' %}selected{% endif %}>Human</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Trait Profile</h3>
+        <p class="form-help">Adjust personality traits (0-100%)</p>
+        <div class="trait-grid">
+            {% for trait, value in individual.trait_profile.items() %}
+            <div class="trait-input">
+                <label>{{ trait }}</label>
+                <input type="range" name="trait_{{ trait }}" min="0" max="100" value="{{ (value * 100)|int }}">
+                <span class="range-value">{{ (value * 100)|int }}%</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Triggers</h3>
+        <p class="form-help">Configure automatic emotional responses</p>
+        <div id="triggers-container">
+            {% for trigger in individual.triggers %}
+            <div class="trigger-item">
+                <input type="text" name="trigger_pattern[]" value="{{ trigger.pattern }}" placeholder="Pattern">
+                <select name="trigger_emotion[]">
+                    {% for emotion in emotions %}
+                    <option value="{{ emotion }}" {% if trigger.emotion==emotion %}selected{% endif %}>{{ emotion }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="trigger_intensity[]" value="{{ trigger.intensity }}" min="0" max="1"
+                    step="0.1">
+                <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">✕</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="addTrigger()">+ Add Trigger</button>
+    </div>
+
+    <div class="form-section">
+        <h3>Masks</h3>
+        <p class="form-help">Define how emotions are presented externally</p>
+        <div id="masks-container">
+            {% for mask in individual.masks %}
+            <div class="mask-item">
+                <select name="mask_emotion[]">
+                    {% for emotion in emotions %}
+                    <option value="{{ emotion }}" {% if mask.emotion==emotion %}selected{% endif %}>{{ emotion }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <span>→</span>
+                <select name="mask_presentation[]">
+                    <option value="hide" {% if mask.presentation=='hide' %}selected{% endif %}>Hide</option>
+                    <option value="minimize" {% if mask.presentation=='minimize' %}selected{% endif %}>Minimize</option>
+                    <option value="exaggerate" {% if mask.presentation=='exaggerate' %}selected{% endif %}>Exaggerate
+                    </option>
+                </select>
+                <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">✕</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="addMask()">+ Add Mask</button>
+    </div>
+
+    <div class="form-actions">
+        <a href="{{ url_for('individuals.detail_view', id=individual.id) }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+</form>
+
+{% block scripts %}
+<script>
+    function addTrigger() {
+        const container = document.getElementById('triggers-container');
+        const item = document.createElement('div');
+        item.className = 'trigger-item';
+        item.innerHTML = `
+        <input type="text" name="trigger_pattern[]" placeholder="Pattern">
+        <select name="trigger_emotion[]">
+            {% for emotion in emotions %}<option value="{{ emotion }}">{{ emotion }}</option>{% endfor %}
+        </select>
+        <input type="number" name="trigger_intensity[]" value="0.5" min="0" max="1" step="0.1">
+        <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">✕</button>
+    `;
+        container.appendChild(item);
+    }
+
+    function addMask() {
+        const container = document.getElementById('masks-container');
+        const item = document.createElement('div');
+        item.className = 'mask-item';
+        item.innerHTML = `
+        <select name="mask_emotion[]">
+            {% for emotion in emotions %}<option value="{{ emotion }}">{{ emotion }}</option>{% endfor %}
+        </select>
+        <span>→</span>
+        <select name="mask_presentation[]">
+            <option value="hide">Hide</option>
+            <option value="minimize">Minimize</option>
+            <option value="exaggerate">Exaggerate</option>
+        </select>
+        <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">✕</button>
+    `;
+        container.appendChild(item);
+    }
+</script>
+{% endblock %}
+{% endblock %}

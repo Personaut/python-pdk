@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Edit Relationship - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>{% if relationship %}Edit{% else %}Create{% endif %} Relationship</h1>
+    <p class="subtitle">Define connection between individuals</p>
+</header>
+
+<form method="POST" class="form-container">
+    <div class="form-section">
+        <h3>Participants</h3>
+
+        <div class="form-group">
+            <label for="individual_a">First Individual *</label>
+            <select id="individual_a" name="individual_a" required>
+                <option value="">Select individual...</option>
+                {% for ind in individuals %}
+                <option value="{{ ind.id }}" {% if relationship and relationship.individual_a==ind.id %}selected{% endif
+                    %}>
+                    {{ ind.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="individual_b">Second Individual *</label>
+            <select id="individual_b" name="individual_b" required>
+                <option value="">Select individual...</option>
+                {% for ind in individuals %}
+                <option value="{{ ind.id }}" {% if relationship and relationship.individual_b==ind.id %}selected{% endif
+                    %}>
+                    {{ ind.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Relationship Type</h3>
+
+        <div class="form-group">
+            <label for="relationship_type">Type *</label>
+            <select id="relationship_type" name="relationship_type" required>
+                <option value="friend" {% if relationship and relationship.type=='friend' %}selected{% endif %}>Friend
+                </option>
+                <option value="colleague" {% if relationship and relationship.type=='colleague' %}selected{% endif %}>
+                    Colleague</option>
+                <option value="family" {% if relationship and relationship.type=='family' %}selected{% endif %}>Family
+                </option>
+                <option value="romantic" {% if relationship and relationship.type=='romantic' %}selected{% endif %}>
+                    Romantic Partner</option>
+                <option value="acquaintance" {% if relationship and relationship.type=='acquaintance' %}selected{% endif
+                    %}>Acquaintance</option>
+                <option value="professional" {% if relationship and relationship.type=='professional' %}selected{% endif
+                    %}>Professional</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="2"
+                placeholder="Describe this relationship...">{{ relationship.description if relationship else '' }}</textarea>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Trust Levels</h3>
+        <p class="form-help">Initial trust from each perspective (0-100%)</p>
+
+        <div class="trust-controls">
+            <div class="trust-control">
+                <label>A → B Trust</label>
+                <input type="range" name="trust_a_to_b" min="0" max="100"
+                    value="{{ ((relationship.trust_levels[relationship.individual_a][relationship.individual_b] if relationship else 0.5) * 100)|int }}">
+                <span class="range-value">{{
+                    ((relationship.trust_levels[relationship.individual_a][relationship.individual_b] if relationship
+                    else 0.5) * 100)|int }}%</span>
+            </div>
+            <div class="trust-control">
+                <label>B → A Trust</label>
+                <input type="range" name="trust_b_to_a" min="0" max="100"
+                    value="{{ ((relationship.trust_levels[relationship.individual_b][relationship.individual_a] if relationship else 0.5) * 100)|int }}">
+                <span class="range-value">{{
+                    ((relationship.trust_levels[relationship.individual_b][relationship.individual_a] if relationship
+                    else 0.5) * 100)|int }}%</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Shared Memories</h3>
+        <p class="form-help">Memories and experiences shared between individuals</p>
+
+        <div id="memories-container">
+            {% for memory in relationship.shared_memories if relationship %}
+            <div class="memory-item">
+                <textarea name="memory_content[]" rows="2">{{ memory.content }}</textarea>
+                <select name="memory_category[]">
+                    <option value="general" {% if memory.category=='general' %}selected{% endif %}>General</option>
+                    <option value="event" {% if memory.category=='event' %}selected{% endif %}>Event</option>
+                    <option value="conversation" {% if memory.category=='conversation' %}selected{% endif %}>
+                        Conversation</option>
+                    <option value="milestone" {% if memory.category=='milestone' %}selected{% endif %}>Milestone
+                    </option>
+                </select>
+                <input type="number" name="memory_importance[]" value="{{ memory.importance }}" min="0" max="1"
+                    step="0.1" placeholder="Importance">
+                <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">✕</button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" class="btn btn-sm btn-secondary" onclick="addMemory()">+ Add Memory</button>
+    </div>
+
+    <div class="form-actions">
+        <a href="{{ url_for('relationships.list_view') }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">{% if relationship %}Save Changes{% else %}Create Relationship{%
+            endif %}</button>
+    </div>
+</form>
+
+{% block scripts %}
+<script>
+    // Range value display
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+        const display = input.nextElementSibling;
+        input.addEventListener('input', () => {
+            display.textContent = input.value + '%';
+        });
+    });
+
+    function addMemory() {
+        const container = document.getElementById('memories-container');
+        const item = document.createElement('div');
+        item.className = 'memory-item';
+        item.innerHTML = `
+        <textarea name="memory_content[]" rows="2" placeholder="Describe the shared memory..."></textarea>
+        <select name="memory_category[]">
+            <option value="general">General</option>
+            <option value="event">Event</option>
+            <option value="conversation">Conversation</option>
+            <option value="milestone">Milestone</option>
+        </select>
+        <input type="number" name="memory_importance[]" value="0.5" min="0" max="1" step="0.1" placeholder="Importance">
+        <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">✕</button>
+    `;
+        container.appendChild(item);
+    }
+</script>
+{% endblock %}
+{% endblock %}

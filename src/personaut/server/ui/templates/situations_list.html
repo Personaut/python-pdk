@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Situations - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1>Situations</h1>
+        <p class="subtitle">Configure interaction contexts for your conversations</p>
+    </div>
+    <a href="{{ url_for('situations.create_view') }}" class="btn btn-primary">📍 New Situation</a>
+</header>
+<div class="card-grid">
+    {% for sit in situations %}
+    <div class="situation-card">
+        <div class="card-header">
+            <h3>{{ modality_icons.get(sit.modality, '📍') }} {{ modality_labels.get(sit.modality, sit.modality) }}</h3>
+            {% if sit.modality in ['in_person', 'phone_call', 'video_call'] %}
+            <span class="badge sync">⚡ sync</span>
+            {% else %}
+            <span class="badge async">📨 async</span>
+            {% endif %}
+        </div>
+        <p class="card-description">{{ sit.description or 'No description' }}</p>
+
+        {# Location & key context #}
+        <div class="card-meta">
+            {% if sit.location %}
+            <span class="meta-tag">📍 {{ sit.location }}</span>
+            {% endif %}
+            {% if sit.context %}
+            {% for key, value in sit.context.items() %}
+            <span class="meta-tag">{{ key.replace('_', ' ').title() }}: {{ value }}</span>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="card-actions">
+            <a href="{{ url_for('situations.detail_view', id=sit.id) }}" class="btn btn-sm btn-primary">View</a>
+            <a href="{{ url_for('situations.edit_view', id=sit.id) }}" class="btn btn-sm btn-secondary">Edit</a>
+        </div>
+    </div>
+    {% else %}
+    <p class="empty-state" style="grid-column:1/-1">No situations yet. Create your first interaction context!</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+# Generated data should NOT live in the source tree.
+# Portraits and videos are now saved to the data directory
+# (configured via PERSONAUT_STORAGE_PATH).
+personaut.db
+portraits/
+videos/

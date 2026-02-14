@@ -1,0 +1,259 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "personaut"
+version = "0.1.0"
+description = "A Python SDK for creating and simulating AI personas with emotional states, personality traits, and memory"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+authors = [
+    { name = "Personaut Team" }
+]
+keywords = [
+    "ai",
+    "personas",
+    "simulation",
+    "emotional-intelligence",
+    "llm",
+    "agents",
+    "personality"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed"
+]
+dependencies = [
+    "pydantic>=2.0",
+    "numpy>=1.24.0",
+    "sqlalchemy>=2.0",
+    "sqlite-vec>=0.1.0",
+    "httpx>=0.25.0",
+]
+
+[project.optional-dependencies]
+gemini = [
+    "google-generativeai>=0.3.0",
+]
+bedrock = [
+    "boto3>=1.28.0",
+]
+openai = [
+    "openai>=1.0.0",
+]
+server = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "flask>=3.0.0",
+    "websockets>=12.0",
+    "jinja2>=3.1.0",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "mypy>=1.7.0",
+    "ruff>=0.1.0",
+    "pre-commit>=3.5.0",
+    "commitizen>=3.12.0",
+    "hypothesis>=6.90.0",
+]
+all = [
+    "personaut[gemini,bedrock,openai,server,dev]",
+]
+
+[project.scripts]
+personaut = "personaut.cli:main"
+
+[project.urls]
+Documentation = "https://github.com/personaut/python-pdk#readme"
+Repository = "https://github.com/personaut/python-pdk"
+Issues = "https://github.com/personaut/python-pdk/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/personaut"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/docs",
+]
+
+# Environment configurations
+[tool.hatch.envs.default]
+dependencies = [
+    "personaut[dev]",
+]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "pytest --cov=src/personaut --cov-report=term-missing {args:tests}"
+test-integ = "pytest {args:tests_integ}"
+type = "mypy src/personaut"
+fmt = "ruff check --fix . && ruff format ."
+lint = "ruff check ."
+
+[tool.hatch.envs.server]
+dependencies = [
+    "personaut[server,dev]",
+]
+
+[tool.hatch.envs.server.scripts]
+start = "python -m personaut.server"
+
+# Ruff configuration
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG",    # flake8-unused-arguments
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "PTH",    # flake8-use-pathlib
+    "RUF",    # Ruff-specific rules
+]
+ignore = [
+    "E402",   # module-import-not-at-top (intentional lazy imports)
+    "E501",   # line too long (handled by formatter)
+    "B008",   # do not perform function calls in argument defaults
+    "B905",   # zip without strict
+    "ARG001", # unused function arguments (interface conformance)
+    "ARG002", # unused method arguments (common in base classes & test fixtures)
+    "PTH123", # builtin open() (used alongside Path objects; Path.open adds no value)
+    "RUF012", # mutable class-level defaults (used as class constants, never mutated)
+    "RUF022", # unsorted __all__ (manual ordering is intentional)
+    "SIM105", # use contextlib.suppress (try/except pass is clearer in context)
+    "SIM108", # use ternary instead of if/else (readability preference)
+    "RUF001", # ambiguous unicode character in string (intentional)
+    "RUF002", # ambiguous unicode character in docstring (intentional)
+    "RUF003", # ambiguous unicode character in comment (intentional)
+    "TC001",  # typing-only first-party import (runtime DI patterns)
+    "TC002",  # typing-only third-party import (runtime DI patterns)
+    "TC003",  # typing-only stdlib import (runtime DI patterns)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+    "ARG001",  # unused function args (test fixtures)
+    "ARG002",  # unused method args (test fixtures)
+    "B018",    # useless expression (assertions in tests)
+    "E741",    # ambiguous variable name (single-letter vars OK in tests)
+    "RUF015",  # unnecessary iterable alloc (readability in tests)
+    "SIM117",  # multiple with statements (clearer in tests)
+    "SIM118",  # in-dict-keys (readability in tests)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["personaut"]
+force-single-line = false
+lines-after-imports = 2
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# Mypy configuration
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = [
+    "sqlite_vec.*",
+    "google.*",
+    "google.generativeai.*",
+    "boto3.*",
+    "botocore.*",
+    "openai",
+    "openai.*",
+    "torch",
+    "torch.*",
+    "sentence_transformers",
+    "sentence_transformers.*",
+    "httpx",
+    "httpx.*",
+]
+ignore_missing_imports = true
+
+# Hatch test environment configuration
+[tool.hatch.envs.hatch-test]
+extra-dependencies = [
+    "pytest-asyncio>=0.21.0",
+    "pytest-mock>=3.10.0",
+]
+
+# Pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "-ra",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "asyncio: marks tests as async tests",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["src/personaut"]
+branch = true
+parallel = true
+omit = [
+    "src/personaut/__about__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "@abstractmethod",
+]
+show_missing = true
+fail_under = 80
+
+# Commitizen configuration
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_scheme = "pep440"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = true

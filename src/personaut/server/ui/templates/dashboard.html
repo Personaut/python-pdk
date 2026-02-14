@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>Dashboard</h1>
+    <p class="subtitle">Manage your AI personas and interactions</p>
+</header>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">👤</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.individuals }}</div>
+            <div class="stat-label">Individuals</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🏠</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.situations }}</div>
+            <div class="stat-label">Situations</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🤝</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.relationships }}</div>
+            <div class="stat-label">Relationships</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.sessions }}</div>
+            <div class="stat-label">Active Sessions</div>
+        </div>
+    </div>
+</div>
+
+<section class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="action-grid">
+        <a href="{{ url_for('individuals.create_view') }}" class="action-card">
+            <span class="action-icon">➕</span>
+            <span class="action-text">Create Individual</span>
+        </a>
+        <a href="{{ url_for('situations.create_view') }}" class="action-card">
+            <span class="action-icon">📍</span>
+            <span class="action-text">New Situation</span>
+        </a>
+        <a href="{{ url_for('chat.select_session') }}" class="action-card">
+            <span class="action-icon">💭</span>
+            <span class="action-text">Start Chat</span>
+        </a>
+    </div>
+</section>
+
+<section class="recent-activity">
+    <h2>Recent Individuals</h2>
+    <div class="card-grid">
+        {% for ind in recent_individuals %}
+        <div class="individual-card">
+            <div class="card-header">
+                <h3>{{ ind.name }}</h3>
+                <span class="badge {{ ind.individual_type }}">{{ ind.individual_type }}</span>
+            </div>
+            <p class="card-description">{{ ind.description or 'No description' }}</p>
+            <div class="card-actions">
+                <a href="{{ url_for('individuals.detail_view', id=ind.id) }}" class="btn btn-sm">View</a>
+            </div>
+        </div>
+        {% else %}
+        <p class="empty-state">No individuals yet. Create your first persona!</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

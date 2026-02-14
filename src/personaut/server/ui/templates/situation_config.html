@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Configure Situation - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>{% if situation %}Edit{% else %}Create{% endif %} Situation</h1>
+    <p class="subtitle">{% if situation %}{{ situation.id }}{% else %}Define interaction context{% endif %}</p>
+</header>
+
+<form method="POST" class="form-container">
+    <div class="form-section">
+        <h3>Basic Information</h3>
+
+        <div class="form-group">
+            <label for="description">Description *</label>
+            <textarea id="description" name="description" rows="3" required
+                placeholder="Describe the situation context...">{{ situation.description if situation else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" id="location" name="location" value="{{ situation.location if situation else '' }}"
+                placeholder="e.g., Coffee shop, Office, Home">
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Communication Modality</h3>
+        <p class="form-help">Select how individuals communicate in this situation</p>
+
+        <div class="modality-grid">
+            <label
+                class="modality-option {% if (situation and situation.modality == 'in_person') or not situation %}selected{% endif %}">
+                <input type="radio" name="modality" value="in_person" {% if (situation and
+                    situation.modality=='in_person' ) or not situation %}checked{% endif %}>
+                <div class="modality-icon">👥</div>
+                <div class="modality-label">In Person</div>
+                <div class="modality-desc">Face-to-face interaction</div>
+            </label>
+
+            <label
+                class="modality-option {% if situation and situation.modality == 'text_message' %}selected{% endif %}">
+                <input type="radio" name="modality" value="text_message" {% if situation and
+                    situation.modality=='text_message' %}checked{% endif %}>
+                <div class="modality-icon">💬</div>
+                <div class="modality-label">Text Message</div>
+                <div class="modality-desc">SMS/Chat messaging</div>
+            </label>
+
+            <label class="modality-option {% if situation and situation.modality == 'email' %}selected{% endif %}">
+                <input type="radio" name="modality" value="email" {% if situation and situation.modality=='email'
+                    %}checked{% endif %}>
+                <div class="modality-icon">📧</div>
+                <div class="modality-label">Email</div>
+                <div class="modality-desc">Formal written communication</div>
+            </label>
+
+            <label class="modality-option {% if situation and situation.modality == 'phone_call' %}selected{% endif %}">
+                <input type="radio" name="modality" value="phone_call" {% if situation and
+                    situation.modality=='phone_call' %}checked{% endif %}>
+                <div class="modality-icon">📞</div>
+                <div class="modality-label">Phone Call</div>
+                <div class="modality-desc">Voice-only conversation</div>
+            </label>
+
+            <label class="modality-option {% if situation and situation.modality == 'video_call' %}selected{% endif %}">
+                <input type="radio" name="modality" value="video_call" {% if situation and
+                    situation.modality=='video_call' %}checked{% endif %}>
+                <div class="modality-icon">📹</div>
+                <div class="modality-label">Video Call</div>
+                <div class="modality-desc">Video conference</div>
+            </label>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Context Details</h3>
+        <p class="form-help">Additional context for the situation</p>
+
+        <div class="form-group">
+            <label for="time_of_day">Time of Day</label>
+            <select id="time_of_day" name="context_time_of_day">
+                <option value="">Not specified</option>
+                <option value="morning" {% if situation and situation.context.time_of_day=='morning' %}selected{% endif
+                    %}>Morning</option>
+                <option value="afternoon" {% if situation and situation.context.time_of_day=='afternoon' %}selected{%
+                    endif %}>Afternoon</option>
+                <option value="evening" {% if situation and situation.context.time_of_day=='evening' %}selected{% endif
+                    %}>Evening</option>
+                <option value="night" {% if situation and situation.context.time_of_day=='night' %}selected{% endif %}>
+                    Night</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="formality">Formality Level</label>
+            <select id="formality" name="context_formality">
+                <option value="casual" {% if situation and situation.context.formality=='casual' %}selected{% endif %}>
+                    Casual</option>
+                <option value="semi_formal" {% if situation and situation.context.formality=='semi_formal' %}selected{%
+                    endif %}>Semi-Formal</option>
+                <option value="formal" {% if situation and situation.context.formality=='formal' %}selected{% endif %}>
+                    Formal</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="purpose">Purpose</label>
+            <input type="text" id="purpose" name="context_purpose"
+                value="{{ situation.context.purpose if situation and situation.context else '' }}"
+                placeholder="e.g., Project planning, Catch up, Interview">
+        </div>
+
+        <div class="form-group">
+            <label for="notes">Additional Notes</label>
+            <textarea id="notes" name="context_notes" rows="2"
+                placeholder="Any other context details...">{{ situation.context.notes if situation and situation.context else '' }}</textarea>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="{{ url_for('situations.list_view') }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">{% if situation %}Save Changes{% else %}Create Situation{% endif
+            %}</button>
+    </div>
+</form>
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('.modality-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.modality-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

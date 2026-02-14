@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% block title %}In Person - {{ session.id }} - Personaut{% endblock %}
+
+{% block content %}
+<div class="scene-container">
+    <header class="scene-header">
+        <div class="scene-info">
+            <h2>{{ situation.description or 'In Person Conversation' }}</h2>
+            <div class="scene-meta">
+                <span class="badge">👥 In Person</span>
+                <span class="location">📍 {{ situation.location or 'Unknown location' }}</span>
+            </div>
+        </div>
+        <div class="scene-controls">
+            <button class="btn btn-sm btn-secondary" id="settings-btn">⚙️ Settings</button>
+            <a href="{{ url_for('chat.select_session') }}" class="btn btn-sm btn-secondary">End Scene</a>
+        </div>
+    </header>
+
+    <div class="scene-content">
+        <aside class="character-panel">
+            <div class="character-card">
+                <div class="character-avatar">{{ individual.name[0] }}</div>
+                <h3>{{ individual.name }}</h3>
+                <div class="emotional-state" id="emotional-state">
+                    {% for emotion, value in individual.emotional_state.items()[:5] %}
+                    <div class="emotion-bar-mini">
+                        <span class="emotion-label">{{ emotion }}</span>
+                        <div class="emotion-track">
+                            <div class="emotion-fill" style="width: {{ value * 100 }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </aside>
+
+        <main class="narrative-panel">
+            <div class="narrative-log" id="narrative-log">
+                <div class="scene-start">
+                    <em>The scene begins...</em>
+                </div>
+                {% for entry in messages %}
+                <div class="narrative-entry {{ entry.type }}">
+                    {% if entry.type == 'action' %}
+                    <p class="action"><em>{{ entry.actor }} {{ entry.content }}</em></p>
+                    {% elif entry.type == 'dialogue' %}
+                    <p class="dialogue">
+                        <strong>{{ entry.speaker }}:</strong> "{{ entry.content }}"
+                    </p>
+                    {% elif entry.type == 'observation' %}
+                    <p class="observation"><em>{{ entry.content }}</em></p>
+                    {% else %}
+                    <p>{{ entry.content }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <form class="action-bar" id="action-form">
+                <select id="action-type">
+                    <option value="say">Say</option>
+                    <option value="do">Do</option>
+                    <option value="think">Think</option>
+                    <option value="observe">Observe</option>
+                </select>
+                <input type="text" id="action-input" placeholder="What do you say or do?">
+                <button type="submit" class="btn btn-primary">➤</button>
+            </form>
+        </main>
+    </div>
+</div>
+
+<style>
+    .scene-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 120px);
+    }
+
+    .scene-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: 12px 12px 0 0;
+    }
+
+    .scene-meta {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .scene-content {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 1rem;
+        padding: 1rem;
+        overflow: hidden;
+    }
+
+    .character-panel {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+
+    .character-card {
+        text-align: center;
+    }
+
+    .character-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), #6366f1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 1rem;
+    }
+
+    .emotion-bar-mini {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.5rem 0;
+        font-size: 0.75rem;
+    }
+
+    .emotion-bar-mini .emotion-label {
+        width: 70px;
+        text-align: right;
+    }
+
+    .emotion-track {
+        flex: 1;
+        height: 6px;
+        background: var(--bg-tertiary);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .emotion-fill {
+        height: 100%;
+        background: var(--accent);
+        border-radius: 3px;
+        transition: width 0.3s;
+    }
+
+    .narrative-panel {
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .narrative-log {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+        font-family: 'Georgia', serif;
+        line-height: 1.8;
+    }
+
+    .scene-start {
+        text-align: center;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .narrative-entry {
+        margin-bottom: 1rem;
+    }
+
+    .narrative-entry .dialogue {
+        margin: 0;
+    }
+
+    .narrative-entry .dialogue strong {
+        color: var(--accent);
+    }
+
+    .narrative-entry .action {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .narrative-entry .observation {
+        color: #888;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .action-bar {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: var(--bg-tertiary);
+    }
+
+    .action-bar select {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: none;
+        padding: 0.75rem;
+        border-radius: 8px;
+    }
+
+    .action-bar input {
+        flex: 1;
+        padding: 0.75rem;
+        border: none;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const sessionId = '{{ session.id }}';
+    const ws = new PersonautWebSocket();
+
+    document.getElementById('action-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const type = document.getElementById('action-type').value;
+        const content = document.getElementById('action-input').value.trim();
+        if (!content) return;
+
+        // Add to narrative
+        addNarrative(type, 'You', content);
+        document.getElementById('action-input').value = '';
+
+        // Send via WebSocket
+        ws.sendMessage(sessionId, content, { type: type });
+    });
+
+    function addNarrative(type, actor, content) {
+        const log = document.getElementById('narrative-log');
+        const entry = document.createElement('div');
+        entry.className = 'narrative-entry';
+
+        if (type === 'say') {
+            entry.innerHTML = `<p class="dialogue"><strong>${actor}:</strong> "${content}"</p>`;
+        } else if (type === 'do') {
+            entry.innerHTML = `<p class="action"><em>${actor} ${content}</em></p>`;
+        } else if (type === 'think') {
+            entry.innerHTML = `<p class="observation"><em>${actor} thinks: ${content}</em></p>`;
+        } else {
+            entry.innerHTML = `<p class="observation"><em>${content}</em></p>`;
+        }
+
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    // Listen for responses
+    ws.addHandler('message', (data) => {
+        addNarrative(data.type || 'say', data.speaker || 'Character', data.content);
+    });
+
+    ws.addHandler('emotional_state_change', (data) => {
+        // Update emotional state display
+        console.log('Emotional state changed:', data);
+    });
+</script>
+{% endblock %}

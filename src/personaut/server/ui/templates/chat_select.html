@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Chat Sessions — Personaut{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-content">
+        <h1>Chat Sessions</h1>
+        <p class="subtitle">Start or continue a conversation</p>
+    </div>
+</div>
+<div class="session-grid">
+    <a href="/chat/new" class="session-card session-card--new">
+        <h3>➕ New Session</h3>
+        <p>Start a new conversation</p>
+    </a>
+    {% for sess in sessions %}
+    <a href="/chat/{{ sess.id }}" class="session-card">
+        <h3>💬 Session</h3>
+        <p>{{ sess.message_count }} messages</p>
+    </a>
+    {% endfor %}
+    {% if not sessions %}
+    <p class="empty-state">No active sessions. Start a new one!</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}

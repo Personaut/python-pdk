@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Individuals - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1>Individuals</h1>
+        <p class="subtitle">Manage your AI personas</p>
+    </div>
+    <a href="{{ url_for('individuals.create_view') }}" class="btn btn-primary">➕ Create Individual</a>
+</header>
+<div class="card-grid">
+    {% for ind in individuals %}
+    <div class="individual-card">
+        <div class="card-header">
+            <h3>{{ ind.name }}</h3>
+            <span class="badge {{ ind.individual_type }}">{{ ind.individual_type }}</span>
+        </div>
+        <p class="card-description">{{ ind.description or 'No description' }}</p>
+
+        {# Metadata tags #}
+        {% if ind.metadata %}
+        <div class="card-meta">
+            {% if ind.metadata.occupation %}<span class="meta-tag">💼 {{ ind.metadata.occupation }}</span>{% endif %}
+            {% if ind.metadata.interests %}<span class="meta-tag">⭐ {{ ind.metadata.interests[:40] }}{% if
+                ind.metadata.interests|length > 40 %}…{% endif %}</span>{% endif %}
+        </div>
+        {% endif %}
+
+        {# Trait highlights #}
+        {% if ind.trait_profile %}
+        <div class="preview-row">
+            {% for trait, value in ind.trait_profile.items() %}
+            {% if value >= 0.7 %}
+            <span class="preview-badge high">↑ {{ trait_fmt(trait) }}</span>
+            {% elif value <= 0.3 %} <span class="preview-badge low">↓ {{ trait_fmt(trait) }}</span>
+                {% endif %}
+                {% endfor %}
+        </div>
+        {% endif %}
+
+        {# Emotion highlights #}
+        {% if ind.emotional_state %}
+        <div class="preview-row">
+            {% for emotion, value in ind.emotional_state.items() %}
+            {% if value > 0.3 %}
+            <span class="preview-badge emotion">{{ emotion }} {{ (value * 100)|int }}%</span>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="card-actions">
+            <a href="{{ url_for('individuals.detail_view', id=ind.id) }}" class="btn btn-sm btn-primary">View</a>
+            <a href="{{ url_for('chat.select_session') }}?individual={{ ind.id }}" class="btn btn-sm btn-secondary">💬
+                Chat</a>
+        </div>
+    </div>
+    {% else %}
+    <p class="empty-state" style="grid-column:1/-1">No individuals yet. Create your first persona!</p>
+    {% endfor %}
+</div>
+{% endblock %}

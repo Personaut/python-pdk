@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Create Situation - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>Create Situation</h1>
+    <p class="subtitle">Define an interaction context — modality, location, and environment</p>
+</header>
+<form method="POST" class="form-container" id="create-form">
+
+    {# ── Core ── #}
+    <div class="form-section">
+        <div class="section-header" onclick="toggleSection('sec-core')">
+            <h3>📍 Situation Details</h3>
+            <span class="toggle">▲</span>
+        </div>
+        <div class="section-body open" id="sec-core">
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" rows="3" required
+                    placeholder="e.g. Casual chat at a coffee shop during a morning rush"></textarea>
+                <p class="form-help">This is fed into the LLM prompt — describe the scene, not just the topic.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location"
+                    placeholder="e.g. Downtown Coffee House, Sarah's apartment, Office meeting room">
+                <p class="form-help">Physical or virtual location. Shows up in the prompt as the setting.</p>
+            </div>
+        </div>
+    </div>
+
+    {# ── Modality ── #}
+    <div class="form-section">
+        <div class="section-header" onclick="toggleSection('sec-modality')">
+            <h3>📡 Communication Modality</h3>
+            <span class="toggle">▲</span>
+        </div>
+        <div class="section-body open" id="sec-modality">
+            <p class="form-help" style="margin-bottom:1rem">
+                The modality determines how the persona communicates — tone, pacing, use of stage directions, formality.
+            </p>
+            <div class="modality-grid">
+                {% for m in modalities %}
+                <label class="modality-option {% if m.value == 'in_person' %}selected{% endif %}">
+                    <input type="radio" name="modality" value="{{ m.value }}" {% if m.value=='in_person' %}checked{%
+                        endif %} style="display:none">
+                    <div class="modality-icon">{{ m.icon }}</div>
+                    <div class="modality-name">{{ m.label }}</div>
+                    <div class="modality-desc">{{ m.desc }}</div>
+                    <div class="modality-traits">
+                        {% if m.sync %}
+                        <span class="trait-chip yes">⚡ sync</span>
+                        {% else %}
+                        <span class="trait-chip no">📨 async</span>
+                        {% endif %}
+                        {% if m.visual %}
+                        <span class="trait-chip yes">👁 visual</span>
+                        {% endif %}
+                        {% if m.audio %}
+                        <span class="trait-chip yes">🔊 audio</span>
+                        {% endif %}
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {# ── Situational Context ── #}
+    <div class="form-section">
+        <div class="section-header" onclick="toggleSection('sec-context')">
+            <h3>🌤️ Situational Context <span
+                    style="font-weight:normal;color:var(--txt3);font-size:0.8rem">(optional)</span></h3>
+            <span class="toggle">▼</span>
+        </div>
+        <div class="section-body" id="sec-context">
+            <p class="form-help" style="margin-bottom:1rem">
+                These details are injected into the prompt as environmental bullet points.
+                Leave blank to omit.
+            </p>
+            <div class="context-grid">
+                {% for key, label, placeholder in context_presets %}
+                <div class="context-item">
+                    <label for="ctx_{{ key }}">{{ label }}</label>
+                    <input type="text" id="ctx_{{ key }}" name="ctx_{{ key }}" placeholder="{{ placeholder }}">
+                </div>
+                {% endfor %}
+            </div>
+
+            <div style="margin-top:1.5rem">
+                <h4 style="color:var(--txt2);font-size:0.85rem;margin-bottom:0.5rem">Custom Context (key / value)</h4>
+                <div id="custom-ctx-rows">
+                    <div class="context-grid" style="margin-bottom:0.5rem">
+                        <div class="context-item">
+                            <input type="text" name="custom_ctx_key" placeholder="Key name">
+                        </div>
+                        <div class="context-item">
+                            <input type="text" name="custom_ctx_val" placeholder="Value">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="addCustomCtx()">+ Add Row</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="{{ url_for('situations.list_view') }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">📍 Create Situation</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Modality selector
+    document.querySelectorAll('.modality-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.modality-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            opt.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+
+    // Section toggle
+    function toggleSection(id) {
+        const body = document.getElementById(id);
+        const toggle = body.previousElementSibling.querySelector('.toggle');
+        body.classList.toggle('open');
+        toggle.textContent = body.classList.contains('open') ? '▲' : '▼';
+    }
+
+    function addCustomCtx() {
+        const container = document.getElementById('custom-ctx-rows');
+        const row = document.createElement('div');
+        row.className = 'context-grid';
+        row.style.marginBottom = '0.5rem';
+        row.innerHTML = `
+        <div class="context-item">
+            <input type="text" name="custom_ctx_key" placeholder="Key name">
+        </div>
+        <div class="context-item">
+            <input type="text" name="custom_ctx_val" placeholder="Value">
+        </div>
+    `;
+        container.appendChild(row);
+    }
+</script>
+{% endblock %}

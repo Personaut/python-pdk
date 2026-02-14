@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Edit Situation - Personaut{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>Edit Situation</h1>
+    <p class="subtitle">Update interaction context</p>
+</header>
+<form method="POST" class="form-container">
+
+    {# ── Core ── #}
+    <div class="form-section">
+        <div class="section-header" onclick="toggleSection('sec-core')">
+            <h3>📍 Situation Details</h3>
+            <span class="toggle">▲</span>
+        </div>
+        <div class="section-body open" id="sec-core">
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" rows="3" required>{{ sit.description or '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" value="{{ sit.location or '' }}">
+            </div>
+        </div>
+    </div>
+
+    {# ── Modality ── #}
+    <div class="form-section">
+        <div class="section-header" onclick="toggleSection('sec-modality')">
+            <h3>📡 Modality</h3>
+            <span class="toggle">▲</span>
+        </div>
+        <div class="section-body open" id="sec-modality">
+            <div class="modality-grid">
+                {% for m in modalities %}
+                <label class="modality-option {% if m.value == current_modality %}selected{% endif %}">
+                    <input type="radio" name="modality" value="{{ m.value }}" {% if m.value==current_modality
+                        %}checked{% endif %} style="display:none">
+                    <div class="modality-icon">{{ m.icon }}</div>
+                    <div class="modality-name">{{ m.label }}</div>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {# ── Context ── #}
+    <div class="form-section">
+        <div class="section-header" onclick="toggleSection('sec-context')">
+            <h3>🌤️ Situational Context</h3>
+            <span class="toggle">▲</span>
+        </div>
+        <div class="section-body open" id="sec-context">
+            <div class="context-grid">
+                {% for key, label, placeholder in context_presets %}
+                <div class="context-item">
+                    <label>{{ label }}</label>
+                    <input type="text" name="ctx_{{ key }}" value="{{ current_context.get(key, '') }}"
+                        placeholder="{{ placeholder }}">
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if custom_context %}
+            <div style="margin-top:1.25rem">
+                <h4 style="color:var(--txt2);font-size:0.85rem;margin-bottom:0.5rem">Custom Context</h4>
+                <div id="custom-ctx-rows">
+                    {% for key, value in custom_context.items() %}
+                    <div class="context-grid" style="margin-bottom:0.5rem">
+                        <div class="context-item">
+                            <input type="text" name="custom_ctx_key" value="{{ key }}">
+                        </div>
+                        <div class="context-item">
+                            <input type="text" name="custom_ctx_val" value="{{ value }}">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="addCustomCtx()">+ Add Row</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="{{ url_for('situations.detail_view', id=sit.id) }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Modality selector
+    document.querySelectorAll('.modality-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.modality-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            opt.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+
+    // Section toggle
+    function toggleSection(id) {
+        const body = document.getElementById(id);
+        const toggle = body.previousElementSibling.querySelector('.toggle');
+        body.classList.toggle('open');
+        toggle.textContent = body.classList.contains('open') ? '▲' : '▼';
+    }
+
+    function addCustomCtx() {
+        let container = document.getElementById('custom-ctx-rows');
+        if (!container) {
+            const sec = document.getElementById('sec-context');
+            const div = document.createElement('div');
+            div.style.marginTop = '1.25rem';
+            div.innerHTML = '<h4 style="color:var(--txt2);font-size:0.85rem;margin-bottom:0.5rem">Custom Context</h4><div id="custom-ctx-rows"></div>';
+            sec.appendChild(div);
+            container = document.getElementById('custom-ctx-rows');
+        }
+        const row = document.createElement('div');
+        row.className = 'context-grid';
+        row.style.marginBottom = '0.5rem';
+        row.innerHTML = '<div class="context-item"><input type="text" name="custom_ctx_key" placeholder="Key"></div><div class="context-item"><input type="text" name="custom_ctx_val" placeholder="Value"></div>';
+        container.appendChild(row);
+    }
+</script>
+{% endblock %}
