@@ -78,6 +78,20 @@ PROVIDERS: list[dict[str, Any]] = [
         "help": "Get a key at https://platform.openai.com/api-keys",
     },
     {
+        "key": "anthropic",
+        "name": "Anthropic (Claude)",
+        "env_key": "ANTHROPIC_API_KEY",
+        "default_model": "claude-sonnet-4-5-20250929",
+        "models": [
+            "claude-opus-4-6",
+            "claude-sonnet-4-5-20250929",
+            "claude-haiku-4-5-20251001",
+            "claude-3-5-sonnet-20241022",
+            "claude-3-5-haiku-20241022",
+        ],
+        "help": "Get a key at https://console.anthropic.com/settings/keys",
+    },
+    {
         "key": "bedrock",
         "name": "AWS Bedrock",
         "env_key": "AWS_ACCESS_KEY_ID",
@@ -150,11 +164,13 @@ def _prompt(label: str, default: str = "", choices: list[str] | None = None) -> 
 
 def _prompt_secret(label: str, existing: str = "") -> str:
     """Prompt for a secret value, masking existing value."""
+    import getpass
+
     masked = ""
     if existing:
         masked = existing[:4] + "•" * max(0, len(existing) - 8) + existing[-4:]
         label += f" [{_dim(masked)}]"
-    value = input(f"  {_bold(label)}: ").strip()
+    value = getpass.getpass(f"  {_bold(label)}: ").strip()
     return value if value else existing
 
 

@@ -37,6 +37,7 @@ class Provider(str, Enum):
     GEMINI = "gemini"
     BEDROCK = "bedrock"
     OPENAI = "openai"
+    ANTHROPIC = "anthropic"
     OLLAMA = "ollama"
 
 
@@ -49,6 +50,7 @@ ENV_EMBEDDING_MODEL = "PERSONAUT_EMBEDDING_MODEL"
 DEFAULT_PROVIDER_PRIORITY = [
     Provider.GEMINI,
     Provider.OPENAI,
+    Provider.ANTHROPIC,
     Provider.BEDROCK,
     Provider.OLLAMA,
 ]
@@ -193,7 +195,7 @@ class ModelRegistry:
                 logger.info(f"Auto-detected provider: {provider.value}")
                 return provider
 
-        msg = "No LLM provider available. Set one of: GOOGLE_API_KEY, OPENAI_API_KEY, or configure AWS credentials"
+        msg = "No LLM provider available. Set one of: GOOGLE_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, or configure AWS credentials"
         raise ModelError(msg, provider="registry")
 
     def _check_provider_available(self, provider: Provider) -> bool:
@@ -202,6 +204,8 @@ class ModelRegistry:
             return bool(os.environ.get("GOOGLE_API_KEY"))
         elif provider == Provider.OPENAI:
             return bool(os.environ.get("OPENAI_API_KEY"))
+        elif provider == Provider.ANTHROPIC:
+            return bool(os.environ.get("ANTHROPIC_API_KEY"))
         elif provider == Provider.BEDROCK:
             # Check for AWS credentials
             return bool(
@@ -236,6 +240,13 @@ class ModelRegistry:
 
             return OpenAIModel(
                 model=model or DEFAULT_OPENAI_MODEL,
+                **kwargs,
+            )
+        elif provider == Provider.ANTHROPIC:
+            from personaut.models.anthropic import DEFAULT_ANTHROPIC_MODEL, AnthropicModel
+
+            return AnthropicModel(
+                model=model or DEFAULT_ANTHROPIC_MODEL,
                 **kwargs,
             )
         elif provider == Provider.BEDROCK:
