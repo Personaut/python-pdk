@@ -364,14 +364,19 @@ def create_relationship(
 
     Args:
         individual_ids: List of individual IDs in the relationship.
+            Must contain at least 2 unique IDs; self-relationships are rejected.
         trust: Trust levels. Can be:
             - Simple dict {id -> level} for symmetric trust
             - Nested dict {from_id -> {to_id -> level}} for asymmetric
+            Trust values are clamped to [0.0, 1.0].
         history: Description of relationship history.
         relationship_type: Type of relationship.
 
     Returns:
         A new Relationship instance.
+
+    Raises:
+        ValidationError: If individual_ids contains fewer than 2 unique IDs.
 
     Example:
         >>> # Symmetric trust
@@ -390,6 +395,18 @@ def create_relationship(
         ...     },
         ... )
     """
+    from personaut.types.exceptions import ValidationError as _ValidationError
+
+    # Validate: require at least 2 unique individuals
+    unique_ids = list(dict.fromkeys(individual_ids))  # preserve order, deduplicate
+    if len(unique_ids) < 2:
+        raise _ValidationError(
+            "Relationship requires at least 2 unique individual IDs "
+            f"(got {individual_ids!r})",
+            field="individual_ids",
+            value=individual_ids,
+        )
+
     # Convert simple trust dict to nested format
     nested_trust: dict[str, dict[str, float]] = {}
 
@@ -397,26 +414,28 @@ def create_relationship(
         # Check if it's already nested
         first_value = next(iter(trust.values()), None)
         if isinstance(first_value, dict):
-            # Already nested format - cast explicitly
+            # Already nested format — clamp values
             for key, value in trust.items():
                 if isinstance(value, dict):
-                    nested_trust[key] = value
+                    nested_trust[key] = {
+                        k: clamp_trust(v) for k, v in value.items()
+                    }
         else:
             # Simple format - use as symmetric trust
-            for ind_id in individual_ids:
+            for ind_id in unique_ids:
                 nested_trust[ind_id] = {}
                 # Get the value and ensure it's a float
                 raw_trust = trust.get(ind_id)
                 if isinstance(raw_trust, (int, float)):
-                    ind_trust = float(raw_trust)
+                    ind_trust = clamp_trust(float(raw_trust))
                 else:
                     ind_trust = get_default_trust()
-                for other_id in individual_ids:
+                for other_id in unique_ids:
                     if other_id != ind_id:
                         nested_trust[ind_id][other_id] = ind_trust
 
     return Relationship(
-        individual_ids=individual_ids,
+        individual_ids=unique_ids,
         trust=nested_trust,
         history=history,
         relationship_type=relationship_type,

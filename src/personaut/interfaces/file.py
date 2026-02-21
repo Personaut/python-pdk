@@ -96,8 +96,16 @@ class FileStorage(BaseStorage):
     # Individual Operations
     # ========================
 
-    def save_individual(self, individual: dict[str, Any]) -> str:
-        """Save an individual to storage."""
+    def save_individual(self, individual: dict[str, Any] | Any) -> str:
+        """Save an individual to storage.
+
+        Accepts either a dictionary or an Individual object (auto-converts
+        via ``to_dict()``).
+        """
+        # Auto-convert objects with to_dict() (e.g. Individual instances)
+        if hasattr(individual, "to_dict"):
+            individual = individual.to_dict()
+
         ind_id = individual.get("id") or self._generate_id("ind")
         now = self._now().isoformat()
 

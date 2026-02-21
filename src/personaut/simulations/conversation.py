@@ -15,11 +15,15 @@ Example:
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from typing import Any
 
 from personaut.simulations.simulation import Simulation
 from personaut.simulations.styles import SimulationStyle
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -125,13 +129,24 @@ class ConversationSimulation(Simulation):
         # Get speaker info
         speaker_name = self._get_individual_name(speaker)
         emotional_state = self._get_emotional_state(speaker)
-        self._get_traits(speaker)
+        traits = self._get_traits(speaker)
 
         # Build context from conversation history
         history_context = self._build_history_context()
 
-        # For now, generate a placeholder response
-        # In a real implementation, this would use the LLM via PromptManager
+        # If an LLM is available, use it for real generation
+        if self.llm is not None:
+            return self._generate_llm_turn(
+                speaker=speaker,
+                speaker_name=speaker_name,
+                emotional_state=emotional_state,
+                traits=traits,
+                history_context=history_context,
+                turn_number=turn_number,
+                include_actions=include_actions,
+            )
+
+        # Fallback: generate a placeholder response
         if turn_number == 0:
             # Opening line
             response = self._generate_opening(speaker_name, emotional_state, include_actions)
@@ -140,6 +155,102 @@ class ConversationSimulation(Simulation):
             response = self._generate_continuation(speaker_name, emotional_state, history_context, include_actions)
 
         return response
+
+    def _generate_llm_turn(
+        self,
+        speaker: Any,
+        speaker_name: str,
+        emotional_state: Any,
+        traits: Any,
+        history_context: str,
+        turn_number: int,
+        include_actions: bool = True,
+    ) -> str:
+        """Generate a conversation turn using the LLM.
+
+        Args:
+            speaker: The speaking individual.
+            speaker_name: Name of the speaker.
+            emotional_state: Speaker's emotional state.
+            traits: Speaker's trait profile.
+            history_context: Summary of conversation so far.
+            turn_number: Current turn number.
+            include_actions: Whether to include actions.
+
+        Returns:
+            LLM-generated response text.
+        """
+        # Build persona prompt
+        situation_desc = getattr(self.situation, "description", "a conversation")
+        location = getattr(self.situation, "location", None)
+
+        prompt_parts = [
+            f"You are roleplaying as {speaker_name} in the following situation: {situation_desc}.",
+        ]
+        if location:
+            prompt_parts.append(f"Location: {location}")
+
+        # Add emotional context
+        if emotional_state is not None:
+            emotions = {}
+            if hasattr(emotional_state, "to_dict"):
+                emotions = emotional_state.to_dict()
+            elif isinstance(emotional_state, dict):
+                emotions = emotional_state
+            active = {k: v for k, v in emotions.items() if v > 0.1}
+            if active:
+                top = sorted(active.items(), key=lambda x: -x[1])[:5]
+                desc = ", ".join(f"{e} ({v:.1f})" for e, v in top)
+                prompt_parts.append(f"{speaker_name}'s current emotional state: {desc}")
+
+        # Add trait context
+        if traits is not None:
+            trait_dict = {}
+            if hasattr(traits, "to_dict"):
+                trait_dict = traits.to_dict()
+            elif isinstance(traits, dict):
+                trait_dict = traits
+            notable = {k: v for k, v in trait_dict.items() if abs(v - 0.5) > 0.15}
+            if notable:
+                top = sorted(notable.items(), key=lambda x: -abs(x[1] - 0.5))[:5]
+                desc = ", ".join(f"{'high' if v > 0.5 else 'low'} {t}" for t, v in top)
+                prompt_parts.append(f"{speaker_name}'s personality: {desc}")
+
+        # Add description if available
+        description = getattr(speaker, "description", None)
+        if description:
+            prompt_parts.append(f"Character description: {description}")
+
+        # Conversation history
+        if history_context:
+            prompt_parts.append(f"\nConversation so far:\n{history_context}")
+
+        # Instruction
+        if include_actions:
+            prompt_parts.append(
+                f"\nGenerate the next line of dialogue for {speaker_name}. "
+                "Include brief physical actions or gestures in parentheses where "
+                "natural, e.g. '(smiles) Hello!'. Keep the response to 1-3 sentences. "
+                "Respond with ONLY the dialogue line, no speaker label."
+            )
+        else:
+            prompt_parts.append(
+                f"\nGenerate the next line of dialogue for {speaker_name}. "
+                "Keep the response to 1-3 sentences. "
+                "Respond with ONLY the dialogue line, no speaker label."
+            )
+
+        prompt = "\n".join(prompt_parts)
+
+        try:
+            result = self.llm.generate(prompt, temperature=0.8, max_tokens=256)
+            return result.text.strip()
+        except Exception as exc:
+            logger.warning("LLM generation failed for %s, falling back to placeholder: %s", speaker_name, exc)
+            # Fall back to placeholder on error
+            if turn_number == 0:
+                return self._generate_opening(speaker_name, emotional_state, include_actions)
+            return self._generate_continuation(speaker_name, emotional_state, history_context, include_actions)
 
     def _generate_opening(
         self,
@@ -162,11 +273,11 @@ class ConversationSimulation(Simulation):
 
         action = ""
         if include_actions:
-            if dominant in ("anxious", "nervous", "insecure"):
+            if dominant in ("anxious", "insecure", "helpless"):
                 action = "(shifts nervously) "
-            elif dominant in ("confident", "proud", "excited"):
+            elif dominant in ("proud", "excited", "energetic"):
                 action = "(smiles warmly) "
-            elif dominant in ("friendly", "trusting", "loving"):
+            elif dominant in ("cheerful", "trusting", "loving"):
                 action = "(approaches with a friendly wave) "
             else:
                 action = ""
@@ -203,9 +314,9 @@ class ConversationSimulation(Simulation):
         action = ""
         if include_actions:
             dominant = self._get_dominant_emotion(emotional_state)
-            if dominant in ("curious", "interested"):
+            if dominant in ("thoughtful", "creative"):
                 action = "(leans in with interest) "
-            elif dominant in ("anxious", "nervous"):
+            elif dominant in ("anxious", "insecure"):
                 action = "(nods thoughtfully) "
             else:
                 action = ""

@@ -249,7 +249,7 @@ class ChatSession:
 
         # Generate placeholder response
         # In a real implementation, this would use the LLM
-        dominant = "friendly"
+        dominant = "cheerful"
         if emotions:
             dominant = max(emotions.items(), key=lambda x: x[1])[0]
 
@@ -306,13 +306,13 @@ class ChatSession:
             Generated response.
         """
         # Simple response generation based on emotion
-        if dominant_emotion in ("friendly", "trusting", "happy"):
+        if dominant_emotion in ("cheerful", "trusting", "loving"):
             return "That's great to hear! Tell me more about that."
-        elif dominant_emotion in ("curious", "interested"):
+        elif dominant_emotion in ("thoughtful", "creative"):
             return "Oh, that's fascinating! I'd love to know more details."
-        elif dominant_emotion in ("anxious", "worried"):
+        elif dominant_emotion in ("anxious", "helpless"):
             return "I see... I hope everything works out okay."
-        elif dominant_emotion in ("excited", "enthusiastic"):
+        elif dominant_emotion in ("excited", "energetic"):
             return "Wow, that's so exciting! What happened next?"
         else:
             return "I understand. What else is on your mind?"

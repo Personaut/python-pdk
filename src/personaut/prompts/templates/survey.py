@@ -120,6 +120,8 @@ class SurveyTemplate(BaseTemplate):
             return ""
 
         dominant = emotional_state.get_dominant()
+        if dominant is None:
+            return ""
         emotion, intensity = dominant
 
         if intensity < 0.3:
@@ -127,10 +129,10 @@ class SurveyTemplate(BaseTemplate):
 
         influence_map = {
             "anxious": "may lead to more cautious or uncertain responses",
-            "confident": "may lead to more decisive, assured responses",
-            "sad": "may lead to more negative or pessimistic responses",
+            "proud": "may lead to more decisive, assured responses",
+            "depressed": "may lead to more negative or pessimistic responses",
             "cheerful": "may lead to more positive, optimistic responses",
-            "frustrated": "may lead to more critical responses",
+            "angry": "may lead to more critical responses",
             "hopeful": "may lead to more optimistic responses",
         }
 

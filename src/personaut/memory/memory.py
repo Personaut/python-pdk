@@ -10,7 +10,7 @@ Example:
     >>>
     >>> memory = Memory(
     ...     description="First meeting with Sarah at the cafe",
-    ...     emotional_state=EmotionalState({"happy": 0.8, "nervous": 0.3}),
+    ...     emotional_state=EmotionalState({"cheerful": 0.8, "anxious": 0.3}),
     ...     context=create_coffee_shop_context(city="Miami, FL"),
     ... )
     >>> print(memory.to_embedding_text())
@@ -98,7 +98,7 @@ class Memory:
     Example:
         >>> memory = Memory(
         ...     description="Had coffee with Sarah",
-        ...     emotional_state=EmotionalState({"happy": 0.7}),
+        ...     emotional_state=EmotionalState({"cheerful": 0.7}),
         ... )
         >>> memory.id
         'mem_abc123...'
@@ -125,11 +125,11 @@ class Memory:
         Example:
             >>> memory = Memory(
             ...     description="Met Sarah at the coffee shop",
-            ...     emotional_state=EmotionalState({"happy": 0.8}),
+            ...     emotional_state=EmotionalState({"cheerful": 0.8}),
             ... )
             >>> print(memory.to_embedding_text())
             Met Sarah at the coffee shop
-            Emotional state: happy (high)
+            Emotional state: cheerful (high)
         """
         parts = [self.description]
 
@@ -277,7 +277,7 @@ def create_memory(
         >>>
         >>> memory = create_memory(
         ...     description="Great conversation with Sarah",
-        ...     emotional_state=EmotionalState({"happy": 0.8}),
+        ...     emotional_state=EmotionalState({"cheerful": 0.8}),
         ...     context=create_coffee_shop_context(city="Miami, FL"),
         ... )
     """

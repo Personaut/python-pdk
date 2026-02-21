@@ -273,17 +273,17 @@ class SurveySimulation(Simulation):
 
         # Generate a contextual placeholder response
         # In a real implementation, this would use the LLM
-        if dominant in ("anxious", "insecure", "nervous"):
+        if dominant in ("anxious", "insecure", "helpless"):
             response = (
                 "I'm not entirely sure, but I think things could be improved "
                 "with more support and clearer communication."
             )
-        elif dominant in ("content", "satisfied", "happy"):
+        elif dominant in ("content", "satisfied", "cheerful"):
             response = (
                 "Overall, I'm quite satisfied with how things are going. "
                 "There's always room for improvement, but I'm pleased with the progress."
             )
-        elif dominant in ("frustrated", "angry", "annoyed"):
+        elif dominant in ("angry", "hostile", "critical"):
             response = (
                 "Honestly, there are several areas that need significant improvement. "
                 "I'd like to see more attention to these issues."
@@ -332,29 +332,25 @@ class SurveySimulation(Simulation):
             return 0.0
 
         positive_emotions = {
-            "happy",
             "content",
             "satisfied",
             "excited",
             "hopeful",
             "proud",
             "trusting",
-            "confident",
-            "loved",
-            "grateful",
+            "appreciated",
+            "respected",
             "cheerful",
             "energetic",
             "creative",
-            "peaceful",
-            "relaxed",
+            "loving",
+            "nurturing",
+            "faithful",
         }
         negative_emotions = {
-            "sad",
             "anxious",
             "angry",
-            "frustrated",
             "depressed",
-            "fearful",
             "lonely",
             "guilty",
             "ashamed",
@@ -364,6 +360,9 @@ class SurveySimulation(Simulation):
             "insecure",
             "helpless",
             "rejected",
+            "bored",
+            "apathetic",
+            "critical",
         }
 
         emotions = {}
@@ -393,7 +392,7 @@ class SurveySimulation(Simulation):
         influences = {
             "anxious": "Elevated anxiety may lead to more cautious responses",
             "content": "Contentment leads to more positive, balanced responses",
-            "frustrated": "Frustration may result in more critical feedback",
+            "angry": "Anger may result in more critical feedback",
             "hopeful": "Hopefulness promotes optimistic, forward-looking responses",
             "insecure": "Insecurity may lead to hedged or uncertain responses",
             "satisfied": "Satisfaction leads to affirming, stable responses",

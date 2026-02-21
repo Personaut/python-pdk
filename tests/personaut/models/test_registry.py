@@ -29,6 +29,7 @@ class TestProvider:
         assert Provider.GEMINI.value == "gemini"
         assert Provider.BEDROCK.value == "bedrock"
         assert Provider.OPENAI.value == "openai"
+        assert Provider.ANTHROPIC.value == "anthropic"
         assert Provider.OLLAMA.value == "ollama"
 
     def test_provider_string_conversion(self) -> None:
@@ -60,7 +61,7 @@ class TestModelRegistry:
         """Test listing all providers."""
         registry = ModelRegistry()
         providers = registry.list_providers()
-        assert len(providers) == 4
+        assert len(providers) == 5
         assert all(isinstance(p[0], Provider) for p in providers)
         assert all(isinstance(p[1], bool) for p in providers)
 

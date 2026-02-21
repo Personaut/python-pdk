@@ -23,10 +23,11 @@ Example:
 
 from __future__ import annotations
 
+import logging
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from personaut.emotions.state import EmotionalState
 from personaut.individuals.physical import PhysicalFeatures
@@ -39,6 +40,8 @@ from personaut.types.exceptions import MINIMUM_SIMULATION_AGE, AgeRestrictionErr
 if TYPE_CHECKING:
     from personaut.memory.memory import Memory
     from personaut.situations.situation import Situation
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -94,8 +97,26 @@ class Individual:
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
 
+    MAX_NAME_LENGTH: ClassVar[int] = 255
+
     def __post_init__(self) -> None:
         """Validate individual constraints after dataclass construction."""
+        from personaut.types.exceptions import ValidationError as _ValidationError
+
+        # Validate name
+        if not self.name or not self.name.strip():
+            raise _ValidationError(
+                "Individual name must not be empty",
+                field="name",
+                value=self.name,
+            )
+        if len(self.name) > self.MAX_NAME_LENGTH:
+            raise _ValidationError(
+                f"Individual name exceeds maximum length of {self.MAX_NAME_LENGTH} characters",
+                field="name",
+                value=self.name,
+            )
+
         # Remember what Uncle Ben said: "With great power comes great
         # responsibility." Don't be a creep!
         if self.age is not None and self.age < MINIMUM_SIMULATION_AGE:
@@ -201,9 +222,17 @@ class Individual:
     def add_memory(self, memory: Memory) -> None:
         """Add a memory to this individual.
 
+        If a memory with the same ID already exists, it is replaced.
+
         Args:
             memory: The memory to add.
         """
+        # Deduplicate by ID — replace existing if same ID
+        for i, existing in enumerate(self.memories):
+            if existing.id == memory.id:
+                self.memories[i] = memory
+                self._update_timestamp()
+                return
         self.memories.append(memory)
         self._update_timestamp()
 
@@ -487,9 +516,13 @@ class Individual:
     def from_dict(cls, data: dict[str, Any]) -> Individual:
         """Create from dictionary.
 
-        Note: This performs a shallow restoration. Memories, masks, and
-        triggers should be restored separately for full fidelity.
+        Performs a full restoration including memories, masks, triggers,
+        and active mask state.
         """
+        from personaut.memory.memory import Memory
+        from personaut.triggers.emotional import EmotionalTrigger
+        from personaut.triggers.situational import SituationalTrigger
+
         # Create emotional state from dict
         emotional_state = EmotionalState()
         if "emotional_state" in data:
@@ -502,9 +535,46 @@ class Individual:
                 try:
                     traits.set_trait(trait, value)
                 except Exception:
-                    pass  # Skip invalid traits
+                    logger.warning("Skipping invalid trait %r=%r during deserialization", trait, value)
 
         physical_features = PhysicalFeatures.from_dict(data.get("physical_features"))
+
+        # Restore memories
+        memories: list[Memory] = []
+        for mem_data in data.get("memories") or []:
+            try:
+                memories.append(Memory.from_dict(mem_data))
+            except Exception:
+                logger.warning("Skipping malformed memory during deserialization", exc_info=True)
+
+        # Restore masks
+        masks: list[Mask] = []
+        for mask_data in data.get("masks") or []:
+            try:
+                masks.append(Mask.from_dict(mask_data))
+            except Exception:
+                logger.warning("Skipping malformed mask during deserialization", exc_info=True)
+
+        # Restore triggers (dispatch by type)
+        triggers: list[Trigger] = []
+        for trigger_data in data.get("triggers") or []:
+            try:
+                trigger_type = trigger_data.get("type", "emotional")
+                if trigger_type == "situational":
+                    triggers.append(SituationalTrigger.from_dict(trigger_data))
+                else:
+                    triggers.append(EmotionalTrigger.from_dict(trigger_data))
+            except Exception:
+                logger.warning("Skipping malformed trigger during deserialization", exc_info=True)
+
+        # Restore active mask reference
+        active_mask: Mask | None = None
+        active_mask_name = data.get("active_mask")
+        if active_mask_name:
+            for m in masks:
+                if m.name == active_mask_name:
+                    active_mask = m
+                    break
 
         return cls(
             id=data["id"],
@@ -513,6 +583,10 @@ class Individual:
             emotional_state=emotional_state,
             traits=traits,
             physical_features=physical_features,
+            memories=memories,
+            masks=masks,
+            triggers=triggers,
+            active_mask=active_mask,
             metadata=data.get("metadata", {}),
             created_at=datetime.fromisoformat(data["created_at"]),
             updated_at=datetime.fromisoformat(data.get("updated_at", data["created_at"])),

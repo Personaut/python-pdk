@@ -64,7 +64,7 @@ individual.add_trait(personaut.traits.create_trait(
 ))
 
 # Create situation context
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.IN_PERSON,
     description='Meeting a new colleague at work',
     location='Office'
@@ -342,7 +342,7 @@ text = component.format(situation)
 
 ```python
 # IN_PERSON modality
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.IN_PERSON,
     description='Coffee shop meeting',
     location='Downtown Cafe'
@@ -351,7 +351,7 @@ situation = personaut.situation.create_situation(
 #          She can observe body language and environmental cues."
 
 # TEXT_MESSAGE modality
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.TEXT_MESSAGE,
     description='Catching up with an old friend'
 )
@@ -551,7 +551,7 @@ The prompt system integrates seamlessly with the simulation engine:
 import personaut
 
 # Create simulation
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=situation,
     individuals=[user_a, user_b],
     type=personaut.simulations.types.CONVERSATION,
@@ -627,7 +627,7 @@ sarah.add_trait(personaut.traits.create_trait(
 ))
 
 mike = personaut.create_individual(name="Mike")  
-mike.emotional_state.change_state({'confident': 0.7, 'impatient': 0.5})
+mike.emotional_state.change_state({'proud': 0.7, 'angry': 0.5})
 mike.add_trait(personaut.traits.create_trait(
     trait=personaut.traits.DOMINANCE, value=0.7
 ))
@@ -663,12 +663,12 @@ mike_prompt = manager.generate(
 base_individual = personaut.create_individual(name="Respondent")
 
 # Anxious version
-anxious_state = personaut.emotion.EmotionalState()
+anxious_state = personaut.emotions.EmotionalState()
 anxious_state.change_state({'anxious': 0.7, 'insecure': 0.5})
 
 # Confident version  
-confident_state = personaut.emotion.EmotionalState()
-confident_state.change_state({'confident': 0.7, 'satisfied': 0.6})
+confident_state = personaut.emotions.EmotionalState()
+confident_state.change_state({'proud': 0.7, 'satisfied': 0.6})
 
 manager = PromptManager()
 

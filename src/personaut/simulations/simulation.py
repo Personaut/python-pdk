@@ -112,6 +112,7 @@ class Simulation(ABC):
     output_format: str = "txt"
     relationships: list[Any] = field(default_factory=list)
     context: dict[str, Any] | None = None
+    llm: Any | None = None
 
     def __post_init__(self) -> None:
         """Initialize default values after dataclass construction."""
@@ -288,6 +289,9 @@ def create_simulation(
     style: SimulationStyle | str | None = None,
     output: str = "txt",
     context: dict[str, Any] | None = None,
+    llm: Any | None = None,
+    provider: str | None = None,
+    model: str | None = None,
     **kwargs: Any,
 ) -> Simulation:
     """Factory function to create appropriate simulation type.
@@ -299,6 +303,14 @@ def create_simulation(
         style: Output style (defaults to simulation type's default).
         output: Output file format (json, txt).
         context: Additional situational context.
+        llm: Optional pre-configured LLM instance for dialogue generation.
+            When provided, the simulation uses real LLM-powered responses
+            instead of placeholder text. Takes precedence over provider/model.
+        provider: Optional LLM provider name (e.g. "gemini", "bedrock",
+            "openai"). Used with ``model`` as a shorthand alternative to
+            passing a pre-built ``llm`` instance.
+        model: Optional model identifier (e.g. "gemini-pro"). Required when
+            ``provider`` is specified.
         **kwargs: Additional arguments passed to specific simulation types.
 
     Returns:
@@ -313,6 +325,16 @@ def create_simulation(
         ...     individuals=[sarah, mike],
         ...     type=SimulationType.CONVERSATION,
         ...     style=SimulationStyle.SCRIPT,
+        ... )
+
+        >>> # With an LLM for real generation:
+        >>> from personaut.models import get_llm
+        >>> llm = get_llm("gemini")
+        >>> simulation = create_simulation(
+        ...     situation=coffee_shop,
+        ...     individuals=[sarah, mike],
+        ...     type=SimulationType.CONVERSATION,
+        ...     llm=llm,
         ... )
     """
     # Import here to avoid circular imports
@@ -336,6 +358,13 @@ def create_simulation(
         msg = f"Unsupported simulation type: {sim_type}"
         raise ValueError(msg)
 
+    # Resolve LLM: explicit llm takes priority, then provider/model shorthand
+    resolved_llm = llm
+    if resolved_llm is None and provider is not None:
+        from personaut.models import get_llm as _get_llm
+
+        resolved_llm = _get_llm(provider, model=model)
+
     instance = simulation_cls(
         situation=situation,
         individuals=individuals,
@@ -343,6 +372,7 @@ def create_simulation(
         style=sim_style,
         output_format=output,
         context=context,
+        llm=resolved_llm,
         **kwargs,
     )
     # Cast needed because mypy cannot infer subclass type from dict lookup
