@@ -443,26 +443,45 @@ class Individual:
     def fire_triggers(
         self,
         situation: Situation | None = None,
+        max_passes: int = 10,
     ) -> list[Trigger]:
-        """Check and fire all matching triggers.
+        """Check and fire all matching triggers with cascading.
 
         This applies the effects of any triggered responses to the
-        individual's emotional state or activates masks.
+        individual's emotional state or activates masks. After each pass,
+        triggers are re-evaluated against the updated state so that
+        cascading chains (e.g. anxiety→anger→hostility) can propagate.
 
         Args:
             situation: Optional situation context.
+            max_passes: Maximum number of evaluation passes (default 10).
+                Prevents infinite loops from circular trigger chains.
 
         Returns:
-            List of triggers that fired.
+            List of all triggers that fired across all passes.
         """
-        fired = self.check_triggers(situation)
-        for trigger in fired:
-            response = trigger.fire(self.emotional_state)
-            if isinstance(response, EmotionalState):
-                self.emotional_state = response
-            elif isinstance(response, Mask):
-                self.active_mask = response
-        return fired
+        all_fired: list[Trigger] = []
+        fired_ids: set[int] = set()  # Track by object id to avoid re-firing same trigger
+
+        for _pass in range(max_passes):
+            fired_this_pass = self.check_triggers(situation)
+
+            # Only fire triggers that haven't already fired
+            new_triggers = [t for t in fired_this_pass if id(t) not in fired_ids]
+            if not new_triggers:
+                break  # Convergence — no new triggers
+
+            for trigger in new_triggers:
+                fired_ids.add(id(trigger))
+                response = trigger.fire(self.emotional_state)
+                if isinstance(response, EmotionalState):
+                    self.emotional_state = response
+                elif isinstance(response, Mask):
+                    self.active_mask = response
+
+            all_fired.extend(new_triggers)
+
+        return all_fired
 
     # -- Metadata Methods --
 

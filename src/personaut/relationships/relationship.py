@@ -406,25 +406,39 @@ def create_relationship(
             value=individual_ids,
         )
 
-    # Convert simple trust dict to nested format
+    # Validate and convert trust dict to nested format
     nested_trust: dict[str, dict[str, float]] = {}
 
     if trust:
-        # Check if it's already nested
+        # Validate all trust values are in [0.0, 1.0]
         first_value = next(iter(trust.values()), None)
         if isinstance(first_value, dict):
-            # Already nested format — clamp values
+            # Nested format — validate then store
             for key, value in trust.items():
                 if isinstance(value, dict):
-                    nested_trust[key] = {k: clamp_trust(v) for k, v in value.items()}
+                    for k, v in value.items():
+                        if not isinstance(v, (int, float)) or v < 0.0 or v > 1.0:
+                            raise _ValidationError(
+                                f"Trust value for {key}→{k} must be between 0.0 and 1.0 (got {v!r})",
+                                field="trust",
+                                value=v,
+                            )
+                    nested_trust[key] = {k: float(v) for k, v in value.items()}
         else:
-            # Simple format - use as symmetric trust
+            # Simple format — validate then use as symmetric trust
+            for ind_id, raw_trust in trust.items():
+                if isinstance(raw_trust, (int, float)) and (raw_trust < 0.0 or raw_trust > 1.0):
+                    raise _ValidationError(
+                        f"Trust value for '{ind_id}' must be between 0.0 and 1.0 (got {raw_trust!r})",
+                        field="trust",
+                        value=raw_trust,
+                    )
+
             for ind_id in unique_ids:
                 nested_trust[ind_id] = {}
-                # Get the value and ensure it's a float
-                raw_trust = trust.get(ind_id)
-                if isinstance(raw_trust, (int, float)):
-                    ind_trust = clamp_trust(float(raw_trust))
+                trust_val = trust.get(ind_id)
+                if isinstance(trust_val, (int, float)):
+                    ind_trust = float(trust_val)
                 else:
                     ind_trust = get_default_trust()
                 for other_id in unique_ids:

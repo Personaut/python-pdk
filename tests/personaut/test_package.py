@@ -16,4 +16,4 @@ class TestPackageImport:
         """Package should have a version string."""
         assert hasattr(personaut, "__version__")
         assert isinstance(personaut.__version__, str)
-        assert personaut.__version__ == "0.3.2"
+        assert personaut.__version__ == "0.3.3"

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-02-21
+
+### Changed
+- **`fire_triggers()` now supports cascading** — Trigger responses that modify emotional state are re-evaluated in subsequent passes, enabling chains like anxiety→anger→hostility. A new `max_passes` parameter (default 10) prevents infinite loops from circular trigger chains. Each trigger fires at most once per call, tracked by object identity.
+- **`create_relationship()` now validates trust values** — Out-of-range trust values (outside 0.0–1.0) now raise `ValidationError` instead of being silently clamped. This makes bad inputs visible rather than hiding them.
+
 ## [0.3.2] - 2026-02-21
 
 ### Fixed
@@ -87,7 +93,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prompt generation system
 - LiveInteractionServer (FastAPI + Flask)
 
-[Unreleased]: https://github.com/personaut/python-pdk/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/personaut/python-pdk/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/personaut/python-pdk/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/personaut/python-pdk/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/personaut/python-pdk/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/personaut/python-pdk/compare/v0.2.0...v0.3.0
