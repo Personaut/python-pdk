@@ -59,9 +59,7 @@ sarah.emotional_state.change_state({
     'cheerful': 0.7,
     'creative': 0.6
 })
-sarah.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.WARMTH, value=0.8
-))
+sarah.set_trait("warmth", 0.8)
 
 # Add to server
 server.add_individual(sarah)

@@ -58,10 +58,7 @@ individual.emotional_state.change_state({
     'hopeful': 0.4,
     'trusting': 0.3
 })
-individual.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.WARMTH,
-    value=0.7
-))
+individual.set_trait("warmth", 0.7)
 
 # Create situation context
 situation = personaut.create_situation(
@@ -75,7 +72,7 @@ manager = PromptManager()
 prompt = manager.generate(
     individual=individual,
     situation=situation,
-    simulation_type='conversation'
+    template='conversation'
 )
 
 print(prompt)
@@ -220,12 +217,8 @@ text = component.format(individual.traits)
 **Example Output:**
 
 ```python
-individual.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.WARMTH, value=0.8
-))
-individual.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.VIGILANCE, value=0.7
-))
+individual.set_trait("warmth", 0.8)
+individual.set_trait("vigilance", 0.7)
 
 text = component.format(individual.traits)
 # Output: "Sarah is notably warm and approachable, genuinely interested in 
@@ -622,15 +615,11 @@ from personaut.prompts import PromptManager
 # Create two individuals with different personalities
 sarah = personaut.create_individual(name="Sarah")
 sarah.emotional_state.change_state({'anxious': 0.4, 'hopeful': 0.6})
-sarah.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.WARMTH, value=0.8
-))
+sarah.set_trait("warmth", 0.8)
 
 mike = personaut.create_individual(name="Mike")  
 mike.emotional_state.change_state({'proud': 0.7, 'angry': 0.5})
-mike.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.DOMINANCE, value=0.7
-))
+mike.set_trait("dominance", 0.7)
 
 # Create shared history
 relationship = personaut.relationships.create_relationship(

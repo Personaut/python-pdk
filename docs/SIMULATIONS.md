@@ -363,10 +363,7 @@ customer = personaut.create_individual(name="Customer")
 
 # Define the sales rep
 sales_rep = personaut.create_individual(name="Sales Rep")
-sales_rep.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.WARMTH,
-    value=0.8
-))
+sales_rep.set_trait("warmth", 0.8)
 
 # Create situation
 situation = personaut.create_situation(
@@ -455,12 +452,8 @@ ai_friend.emotional_state.change_state({
 })
 
 # Add personality traits
-ai_friend.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.WARMTH, value=0.8
-))
-ai_friend.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.LIVELINESS, value=0.6
-))
+ai_friend.set_trait("warmth", 0.8)
+ai_friend.set_trait("liveliness", 0.6)
 
 # Create human participant (you)
 human = personaut.create_human(name='Anthony')
@@ -829,16 +822,12 @@ import personaut
 # Create support agent persona
 support_agent = personaut.create_individual(name="Alex")
 support_agent.emotional_state.change_state({
-    'helpful': 0.8,
-    'patient': 0.7,
-    'professional': 0.9
+    'cheerful': 0.8,
+    'content': 0.7,
+    'satisfied': 0.9
 })
-support_agent.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.WARMTH, value=0.7
-))
-support_agent.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.EMOTIONAL_STABILITY, value=0.8
-))
+support_agent.set_trait("warmth", 0.7)
+support_agent.set_trait("emotional_stability", 0.8)
 
 # Add professional mask that activates by default
 professional_mask = personaut.masks.create_mask(
@@ -1049,25 +1038,19 @@ simulation.run(
 simulation.run(
     num=10,
     dir='./output/',
-    
-    # Output options
-    filename_prefix='conversation_',
-    include_metadata=True,
-    save_prompts=True,  # Save generated prompts for debugging
-    
-    # Execution options
-    parallel=True,      # Run variations in parallel
-    max_workers=4,      # Number of parallel workers
-    
-    # State tracking
-    track_emotions=True,  # Log emotion changes per turn
-    track_memories=True,  # Log memory retrievals
-    
-    # Callbacks
-    on_turn=lambda turn: print(f"Turn {turn.number} completed"),
-    on_complete=lambda results: analyze_results(results)
+    options={
+        'include_actions': True,   # Include physical actions/gestures
+        'update_emotions': True,   # Update emotional state each turn
+        'create_memories': True,   # Create memories from conversation
+    }
 )
 ```
+
+> **Planned Features (not yet implemented):** Future releases will add
+> `parallel`, `max_workers`, `track_emotions`, `track_memories`,
+> `save_prompts`, `filename_prefix`, `include_metadata`, `on_turn`,
+> and `on_complete` parameters to `simulation.run()`.
+
 
 ### Output Files
 
@@ -1143,12 +1126,8 @@ customer.emotional_state.change_state({
 
 # Patient service rep
 service_rep = personaut.create_individual(name="Support Agent")
-service_rep.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.WARMTH, value=0.8
-))
-service_rep.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.EMOTIONAL_STABILITY, value=0.7
-))
+service_rep.set_trait("warmth", 0.8)
+service_rep.set_trait("emotional_stability", 0.7)
 
 situation = personaut.create_situation(
     type=personaut.types.modality.PHONE_CALL,
@@ -1185,9 +1164,7 @@ for i, profile in enumerate(personality_profiles):
     respondent = personaut.create_individual(name=f"Respondent_{i+1}")
     for trait_name, value in profile.items():
         trait = getattr(personaut.traits, trait_name.upper())
-        respondent.add_trait(personaut.traits.create_trait(
-            trait=trait, value=value
-        ))
+        respondent.set_trait(trait_name, value)
     respondents.append(respondent)
 
 # Run survey for each respondent
