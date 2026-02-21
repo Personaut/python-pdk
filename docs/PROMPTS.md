@@ -236,17 +236,22 @@ from personaut.prompts.components import MemoryComponent
 component = MemoryComponent()
 
 # Get relevant memories via vector search
-from personaut.memory import search_memories
+from personaut.memory import search_memories, InMemoryVectorStore
+
+store = InMemoryVectorStore()
+# ... (store memories with embeddings first)
 
 relevant_memories = search_memories(
-    individual_id=individual.id,
+    store=store,
     query=situation.description,
+    embed_func=my_embed_function,
     limit=5,
+    owner_id=individual.id,
+    trust_level=0.8,
 )
 
 text = component.format(
     memories=relevant_memories,
-    trust_level=0.8  # For private memory filtering
 )
 ```
 
@@ -267,12 +272,12 @@ individual_memory = create_individual_memory(
 # Shared memories - multiple perspectives
 shared_memory = create_shared_memory(
     description='Collaborated on successful project last quarter',
-    individual_ids=[individual.id, colleague.id],
+    participant_ids=[individual.id, colleague.id],
 )
 
 # Private memories - trust-gated
 private_memory = create_private_memory(
-    individual_id=individual.id,
+    owner_id=individual.id,
     description='Struggled with imposter syndrome for months',
     trust_threshold=0.7,
 )
