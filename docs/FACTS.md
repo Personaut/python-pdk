@@ -419,7 +419,7 @@ Facts provide structured context for memories:
 # Create memory with situational context
 memory = Memory(
     description="First date at the coffee shop",
-    emotional_state=EmotionalState({"happy": 0.8, "nervous": 0.4}),
+    emotional_state=EmotionalState({"cheerful": 0.8, "anxious": 0.4}),
     context=create_coffee_shop_context(
         city="Miami, FL",
         venue_name="Sunrise Cafe",

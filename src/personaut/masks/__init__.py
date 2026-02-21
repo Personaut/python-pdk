@@ -10,7 +10,7 @@ Basic Usage:
     >>> # Create a custom mask
     >>> my_mask = create_mask(
     ...     name="interview",
-    ...     emotional_modifications={"anxious": -0.3, "confident": 0.4},
+    ...     emotional_modifications={"anxious": -0.3, "proud": 0.4},
     ...     trigger_situations=["interview", "formal"],
     ... )
     >>>

@@ -56,8 +56,8 @@ server = LiveInteractionServer()
 # Create an individual to interact with
 sarah = personaut.create_individual(name="Sarah")
 sarah.emotional_state.change_state({
-    'friendly': 0.7,
-    'curious': 0.6
+    'cheerful': 0.7,
+    'creative': 0.6
 })
 sarah.add_trait(personaut.traits.create_trait(
     trait=personaut.traits.WARMTH, value=0.8
@@ -109,7 +109,7 @@ The FastAPI backend provides a RESTful API for managing all aspects of live inte
 # Request: {
 #   "name": "Mike",
 #   "traits": [{"trait": "WARMTH", "value": 0.6}],
-#   "emotional_state": {"friendly": 0.5}
+#   "emotional_state": {"cheerful": 0.5}
 # }
 # Response: {"id": "mike_002", "name": "Mike", ...}
 
@@ -134,8 +134,8 @@ The FastAPI backend provides a RESTful API for managing all aspects of live inte
 ```python
 # GET /api/individuals/{id}/emotions
 # Response: {
-#   "current": {"friendly": 0.7, "curious": 0.6, ...},
-#   "dominant": "friendly",
+#   "current": {"cheerful": 0.7, "creative": 0.6, ...},
+#   "dominant": "cheerful",
 #   "category": "peaceful",
 #   "history": [...]
 # }
@@ -280,7 +280,7 @@ The FastAPI backend provides a RESTful API for managing all aspects of live inte
 # POST /api/relationships/{id}/memories
 # Request: {
 #   "description": "Celebrated Sarah's promotion together",
-#   "emotional_impact": {"happy": 0.3, "grateful": 0.2}
+#   "emotional_impact": {"cheerful": 0.3, "appreciated": 0.2}
 # }
 ```
 
@@ -343,7 +343,7 @@ The FastAPI backend provides a RESTful API for managing all aspects of live inte
 #   "type": "emotional",
 #   "description": "Anxiety spike",
 #   "rules": [{"emotion": "anxious", "threshold": 0.7, "operator": ">"}],
-#   "response": {"type": "emotional_modification", "changes": {"calm": 0.3}}
+#   "response": {"type": "emotional_modification", "changes": {"content": 0.3}}
 # }
 
 # PATCH /api/individuals/{id}/triggers/{trigger_id}
@@ -507,8 +507,8 @@ Access at `http://localhost:5000`
 │                                                                 │
 │  ── Emotional State ──────────────────────────────────────────  │
 │                                                                 │
-│  😊 friendly    [████████░░] 0.7    [Reset]                    │
-│  🤔 curious     [██████░░░░] 0.6                               │
+│  😊 cheerful    [████████░░] 0.7    [Reset]                    │
+│  🤔 creative    [██████░░░░] 0.6                               │
 │  🤝 trusting    [█████░░░░░] 0.5                               │
 │  😰 anxious     [██░░░░░░░░] 0.2                               │
 │                                                                 │
@@ -603,7 +603,7 @@ Access at `http://localhost:5000`
 │     Emotional impact: +0.2 trust, +0.1 appreciation            │
 │                                                                 │
 │  📝 "Celebrated Sarah's promotion at the usual bar"            │
-│     Emotional impact: +0.3 happy, +0.1 grateful                │
+│     Emotional impact: +0.3 cheerful, +0.1 appreciated          │
 │                                                                 │
 │  [+ Add Shared Memory]                                         │
 │                                                                 │
@@ -655,8 +655,8 @@ Access at `http://localhost:5000`
 ┌─ 📊 Emotional State Panel ──────────────────────────────────────┐
 │  Sarah's Current State:                                         │
 │  😊 excited    ████████░░ 0.8  ↑ +0.2                          │
-│  🤝 friendly   ████████░░ 0.8                                   │
-│  💭 nostalgic  ██████░░░░ 0.6  NEW                             │
+│  🤝 trusting   ████████░░ 0.8                                   │
+│  💭 intimate   ██████░░░░ 0.6  NEW                             │
 │                                                                 │
 │  [View History] [Show All]                                      │
 └─────────────────────────────────────────────────────────────────┘
@@ -881,7 +881,7 @@ client = LiveInteractionClient(
 sarah = client.individuals.create(
     name='Sarah',
     traits=[{'trait': 'WARMTH', 'value': 0.8}],
-    emotional_state={'friendly': 0.7}
+    emotional_state={'cheerful': 0.7}
 )
 
 # Create situation

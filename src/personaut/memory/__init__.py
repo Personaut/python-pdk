@@ -19,7 +19,7 @@ Example:
     >>> memory = create_individual_memory(
     ...     owner_id="sarah_123",
     ...     description="Great coffee date with Mike",
-    ...     emotional_state=EmotionalState({"happy": 0.8}),
+    ...     emotional_state=EmotionalState({"cheerful": 0.8}),
     ...     context=create_coffee_shop_context(city="Miami, FL"),
     ... )
     >>>

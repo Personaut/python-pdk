@@ -77,7 +77,7 @@ PRIMARY_EMOTIONS = [
     "proud",
     "anxious",
     "angry",
-    "sad",
+    "depressed",
     "lonely",
     "confused",
     "guilty",
@@ -280,13 +280,16 @@ def _process_masks(ind_id: str) -> dict[str, dict[str, Any]]:
         created_masks[mask_name] = mask_dict
 
         # Create mask via the API (handles in-memory state + DB persistence)
-        _api_post(f"/individuals/{ind_id}/masks", {
-            "name": mask_dict.get("name", mask_name),
-            "description": mask_dict.get("description", ""),
-            "emotional_modifications": mask_dict.get("emotional_modifications", {}),
-            "trigger_situations": mask_dict.get("trigger_situations", []),
-            "active_by_default": mask_dict.get("active_by_default", False),
-        })
+        _api_post(
+            f"/individuals/{ind_id}/masks",
+            {
+                "name": mask_dict.get("name", mask_name),
+                "description": mask_dict.get("description", ""),
+                "emotional_modifications": mask_dict.get("emotional_modifications", {}),
+                "trigger_situations": mask_dict.get("trigger_situations", []),
+                "active_by_default": mask_dict.get("active_by_default", False),
+            },
+        )
 
     return created_masks
 
@@ -343,18 +346,20 @@ def _process_triggers(ind_id: str, created_masks: dict[str, dict[str, Any]]) -> 
             response_data = pdk_resp.get("data")
 
         # Create trigger via the API (handles in-memory state + DB persistence)
-        _api_post(f"/individuals/{ind_id}/triggers", {
-            "description": trigger_dict.get("description", desc_t),
-            "trigger_type": trigger_dict.get("type", td.get("trigger_type", "emotional")),
-            "rules": api_rules,
-            "match_all": trigger_dict.get("match_all", True),
-            "active": trigger_dict.get("active", True),
-            "priority": trigger_dict.get("priority", 0),
-            "keyword_triggers": trigger_dict.get("keyword_triggers", []),
-            "response_type": response_type,
-            "response_data": response_data,
-        })
-
+        _api_post(
+            f"/individuals/{ind_id}/triggers",
+            {
+                "description": trigger_dict.get("description", desc_t),
+                "trigger_type": trigger_dict.get("type", td.get("trigger_type", "emotional")),
+                "rules": api_rules,
+                "match_all": trigger_dict.get("match_all", True),
+                "active": trigger_dict.get("active", True),
+                "priority": trigger_dict.get("priority", 0),
+                "keyword_triggers": trigger_dict.get("keyword_triggers", []),
+                "response_type": response_type,
+                "response_data": response_data,
+            },
+        )
 
 
 @bp.route("/create", methods=["GET", "POST"])

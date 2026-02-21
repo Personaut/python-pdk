@@ -1,7 +1,7 @@
 """LLM model providers for Personaut PDK.
 
 This module provides interfaces for text generation and embedding models
-from various providers including Gemini, Bedrock, OpenAI, and Ollama.
+from various providers including Gemini, Bedrock, OpenAI, Anthropic, and Ollama.
 
 The PDK uses a **local-first embedding strategy** where embeddings are
 always generated locally using sentence-transformers. This ensures
@@ -40,13 +40,14 @@ Provider Examples:
 
 Configuration:
     Environment variables:
-    - PERSONAUT_LLM_PROVIDER: Default LLM provider (gemini, openai, bedrock, ollama)
+    - PERSONAUT_LLM_PROVIDER: Default LLM provider (gemini, openai, anthropic, bedrock, ollama)
     - PERSONAUT_LLM_MODEL: Default model name
     - PERSONAUT_EMBEDDING_MODEL: Embedding model (default: all-MiniLM-L6-v2)
 
     Provider-specific:
     - GOOGLE_API_KEY: For Gemini
     - OPENAI_API_KEY: For OpenAI
+    - ANTHROPIC_API_KEY: For Anthropic (Claude)
     - AWS credentials: For Bedrock (via boto3)
 """
 
@@ -129,6 +130,17 @@ def _lazy_import_ollama() -> tuple[type, object, str, str]:
     return OllamaModel, create_ollama_model, DEFAULT_OLLAMA_MODEL, DEFAULT_OLLAMA_HOST
 
 
+def _lazy_import_anthropic() -> tuple[type, object, str, list[str]]:
+    from personaut.models.anthropic import (
+        AVAILABLE_ANTHROPIC_MODELS,
+        DEFAULT_ANTHROPIC_MODEL,
+        AnthropicModel,
+        create_anthropic_model,
+    )
+
+    return AnthropicModel, create_anthropic_model, DEFAULT_ANTHROPIC_MODEL, AVAILABLE_ANTHROPIC_MODELS
+
+
 # Registry
 from personaut.models.registry import (
     ENV_EMBEDDING_MODEL,
@@ -174,6 +186,16 @@ def __getattr__(name: str) -> object:
             "DEFAULT_BEDROCK_MODEL": bedrock_exports[3],
         }
         return bedrock_mapping[name]
+
+    elif name in ("AnthropicModel", "create_anthropic_model", "DEFAULT_ANTHROPIC_MODEL", "AVAILABLE_ANTHROPIC_MODELS"):
+        anthropic_exports = _lazy_import_anthropic()
+        anthropic_mapping: dict[str, object] = {
+            "AnthropicModel": anthropic_exports[0],
+            "create_anthropic_model": anthropic_exports[1],
+            "DEFAULT_ANTHROPIC_MODEL": anthropic_exports[2],
+            "AVAILABLE_ANTHROPIC_MODELS": anthropic_exports[3],
+        }
+        return anthropic_mapping[name]
 
     elif name in ("OllamaModel", "create_ollama_model", "DEFAULT_OLLAMA_MODEL", "DEFAULT_OLLAMA_HOST"):
         ollama_exports = _lazy_import_ollama()
@@ -236,6 +258,11 @@ __all__ = [
     "create_bedrock_model",
     "BEDROCK_MODELS",
     "DEFAULT_BEDROCK_MODEL",
+    # Anthropic (lazy)
+    "AnthropicModel",
+    "create_anthropic_model",
+    "DEFAULT_ANTHROPIC_MODEL",
+    "AVAILABLE_ANTHROPIC_MODELS",
     # Ollama (lazy)
     "OllamaModel",
     "create_ollama_model",

@@ -127,7 +127,6 @@ TRAIT_COEFFICIENTS: dict[str, dict[str, float]] = {
         "anxious": 0.3,
         "hostile": 0.2,
         "critical": 0.3,
-        "suspicious": 0.4,
         "insecure": 0.2,
     },
     ABSTRACTEDNESS: {
@@ -170,18 +169,16 @@ TRAIT_COEFFICIENTS: dict[str, dict[str, float]] = {
     PERFECTIONISM: {
         "satisfied": 0.2,
         "guilty": 0.2,
-        "frustrated": 0.3,
+        "angry": 0.3,
         "critical": 0.3,
         "anxious": 0.2,
     },
     TENSION: {
         "anxious": 0.4,
-        "angry": 0.3,
-        "hostile": 0.2,
-        "relaxed": -0.4,
-        "content": -0.3,
+        "angry": 0.4,
+        "hostile": 0.3,
+        "content": -0.4,
         "energetic": 0.2,
-        "impatient": 0.4,
     },
 }
 """Mapping of traits to their emotion coefficients."""

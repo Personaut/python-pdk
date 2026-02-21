@@ -647,8 +647,7 @@ def _build_identity_guidelines(
 _MODALITY_GUIDELINES: dict[Modality, list[str]] = {
     Modality.TEXT_MESSAGE: [
         "This is a text conversation. Write like a real person texting — short, casual, natural.",
-        "Do NOT include stage directions, action descriptions in [brackets], "
-        "or tone cues in (parentheses).",
+        "Do NOT include stage directions, action descriptions in [brackets], or tone cues in (parentheses).",
         "Keep messages to 1-3 sentences unless the topic warrants more.",
         # Note: name-specific guideline appended at runtime
     ],
@@ -1209,17 +1208,17 @@ def _fallback_emotional(
     emoji: str,
 ) -> str | None:
     """Return an emotion-driven response if the dominant emotion is strong enough."""
-    if dominant_emotion in ("anxious", "worried") and dominant_intensity > 0.5:
+    if dominant_emotion in ("anxious",) and dominant_intensity > 0.5:
         if is_texting:
             return "Idk honestly... been kind of stressed about stuff 😅"
-        return "[fidgets slightly](nervous) Yeah... I've had a lot on my mind lately."
+        return "[fidgets slightly](uneasy) Yeah... I've had a lot on my mind lately."
 
-    if dominant_emotion in ("cheerful", "happy", "excited") and dominant_intensity > 0.5:
+    if dominant_emotion in ("cheerful", "excited") and dominant_intensity > 0.5:
         if is_texting:
             return f"Haha yeah!{emoji} Things have been really good lately"
         return f"[grins]{emoji}(enthusiastic) Yeah! Things have been great lately."
 
-    if dominant_emotion in ("sad", "melancholy") and dominant_intensity > 0.5:
+    if dominant_emotion in ("depressed", "lonely") and dominant_intensity > 0.5:
         if is_texting:
             return "Yeah... it's been kinda rough tbh"
         return "[looks down](quiet) Yeah... it's been a tough one."

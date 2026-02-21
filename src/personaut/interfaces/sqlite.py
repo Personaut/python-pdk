@@ -234,6 +234,10 @@ class SQLiteStorage(BaseStorage):
                 except (json.JSONDecodeError, TypeError):
                     pass
 
+        # Normalize DB column name to match Individual.from_dict() expectation
+        if "trait_profile" in result and "traits" not in result:
+            result["traits"] = result.pop("trait_profile")
+
         return result
 
     def _prepare_json_fields(self, data: dict[str, Any]) -> dict[str, Any]:
@@ -248,12 +252,26 @@ class SQLiteStorage(BaseStorage):
     # Individual Operations
     # ========================
 
-    def save_individual(self, individual: dict[str, Any]) -> str:
-        """Save an individual to the database."""
+    def save_individual(self, individual: dict[str, Any] | Any) -> str:
+        """Save an individual to the database.
+
+        Accepts either a dictionary or an Individual object (auto-converts
+        via ``to_dict()``).
+        """
+        # Auto-convert objects with to_dict() (e.g. Individual instances)
+        if hasattr(individual, "to_dict"):
+            individual = individual.to_dict()
+
         ind_id = individual.get("id") or self._generate_id("ind")
         now = self._now().isoformat()
 
-        data = self._prepare_json_fields(individual)
+        # Normalize key names: Individual.to_dict() uses "traits" but
+        # the DB column is "trait_profile".  Accept either key.
+        normalized = individual.copy()
+        if "traits" in normalized and "trait_profile" not in normalized:
+            normalized["trait_profile"] = normalized.pop("traits")
+
+        data = self._prepare_json_fields(normalized)
 
         with self._transaction() as cursor:
             cursor.execute(

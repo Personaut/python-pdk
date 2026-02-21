@@ -318,7 +318,7 @@ class EmotionalState:
 
         Example:
             >>> state = EmotionalState()
-            >>> state.change_state({"anxious": 0.9, "hopeful": 0.7, "sad": 0.5})
+            >>> state.change_state({"anxious": 0.9, "hopeful": 0.7, "depressed": 0.5})
             >>> state.get_top(2)
             [('anxious', 0.9), ('hopeful', 0.7)]
         """

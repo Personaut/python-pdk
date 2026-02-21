@@ -28,7 +28,7 @@ Every simulation requires a situation that defines the context for the interacti
 import personaut
 from datetime import datetime
 
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.IN_PERSON,
     description='Meeting at a coffee shop to discuss a project',
     time=datetime.now(),
@@ -76,7 +76,7 @@ email = personaut.types.modality.EMAIL
 
 ```python
 # Detailed situation with additional context
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.TEXT_MESSAGE,
     description='Receiving a text message from an old friend',
     time=datetime.now(),
@@ -108,7 +108,7 @@ context = create_coffee_shop_context(
 )
 
 # Use in simulation
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.IN_PERSON,
     description=context.description,
     location=context.get_value("city"),
@@ -135,7 +135,7 @@ context = await llm_extractor.extract(
 )
 
 # Use extracted context in simulation
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.IN_PERSON,
     description="Coffee shop meeting",
     location=context.get_value("city"),
@@ -161,17 +161,17 @@ user_b = personaut.create_individual(name="Mike")
 
 # Set up emotional states
 user_a.emotional_state.change_state({'anxious': 0.4, 'hopeful': 0.6})
-user_b.emotional_state.change_state({'confident': 0.7, 'friendly': 0.5})
+user_b.emotional_state.change_state({'proud': 0.7, 'cheerful': 0.5})
 
 # Create situation
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.IN_PERSON,
     description='First meeting at a networking event',
     location='Conference Center'
 )
 
 # Create simulation
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=situation,
     individuals=[user_a, user_b],
     type=personaut.simulations.types.CONVERSATION,
@@ -217,7 +217,7 @@ user_a = personaut.create_individual(name="Sarah")
 user_b = personaut.create_individual(name="Mike")
 user_c = personaut.create_individual(name="Alex")
 
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=team_meeting_situation,
     individuals=[user_a, user_b, user_c],
     type=personaut.simulations.types.CONVERSATION,
@@ -236,7 +236,7 @@ For background characters or service roles that don't need full personality trac
 barista = personaut.create_nontracked_individual(role='barista')
 
 # Use in simulation
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=coffee_shop_situation,
     individuals=[user_a, barista],
     type=personaut.simulations.types.CONVERSATION,
@@ -274,12 +274,12 @@ survey_questions = [
     }
 ]
 
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.SURVEY,
     description='Annual employee satisfaction survey'
 )
 
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=situation,
     individuals=[user_a],
     type=personaut.simulations.types.SURVEY,
@@ -327,18 +327,18 @@ Run the same survey with different emotional states to see response patterns:
 
 ```python
 # Anxious respondent
-anxious_state = personaut.emotion.EmotionalState()
+anxious_state = personaut.emotions.EmotionalState()
 anxious_state.change_state({'anxious': 0.7, 'insecure': 0.5})
 
 # Confident respondent
-confident_state = personaut.emotion.EmotionalState()
-confident_state.change_state({'confident': 0.8, 'satisfied': 0.6})
+confident_state = personaut.emotions.EmotionalState()
+confident_state.change_state({'proud': 0.8, 'satisfied': 0.6})
 
-for state, label in [(anxious_state, 'anxious'), (confident_state, 'confident')]:
+for state, label in [(anxious_state, 'anxious'), (confident_state, 'proud')]:
     respondent = personaut.create_individual(name=f"Respondent_{label}")
     respondent.emotional_state = state
     
-    simulation = personaut.simulation.create_simulation(
+    simulation = personaut.create_simulation(
         situation=survey_situation,
         individuals=[respondent],
         type=personaut.simulations.types.SURVEY,
@@ -369,14 +369,14 @@ sales_rep.add_trait(personaut.traits.create_trait(
 ))
 
 # Create situation
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.IN_PERSON,
     description='Coffee shop upselling interaction',
     location='Denver, CO'
 )
 
 # Create outcome simulation
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=situation,
     individuals=[customer, sales_rep],
     type=personaut.simulations.types.OUTCOME_SUMMARY,
@@ -418,20 +418,20 @@ Recommendations:
 
 ```python
 # Randomize emotional state
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     ...
     randomize=[customer.emotional_state]
 )
 
 # Randomize specific emotions only
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     ...
     randomize_emotions=['anxious', 'content', 'trusting'],
     randomize_range=(0.2, 0.8)  # Min and max values
 )
 
 # Randomize traits
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     ...
     randomize_traits=[personaut.traits.WARMTH, personaut.traits.DOMINANCE]
 )
@@ -449,8 +449,8 @@ import personaut
 # Create the AI individual you'll chat with
 ai_friend = personaut.create_individual(name="Sarah")
 ai_friend.emotional_state.change_state({
-    'friendly': 0.7,
-    'curious': 0.6,
+    'cheerful': 0.7,
+    'creative': 0.6,
     'trusting': 0.5
 })
 
@@ -466,13 +466,13 @@ ai_friend.add_trait(personaut.traits.create_trait(
 human = personaut.create_human(name='Anthony')
 
 # Define the situation with modality
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.TEXT_MESSAGE,
     description='Catching up with an old college friend'
 )
 
 # Create live simulation
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=situation,
     individuals=[ai_friend, human],
     type=personaut.simulations.types.LIVE_CONVERSATION,
@@ -490,7 +490,7 @@ The simulator renders different UIs based on the modality type, creating an auth
 #### Text Message Modality
 
 ```python
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.TEXT_MESSAGE,
     description='Texting with a friend'
 )
@@ -515,7 +515,7 @@ simulation.start_simulator()
 #### Email Modality
 
 ```python
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.EMAIL,
     description='Professional correspondence about a project',
     context={
@@ -543,7 +543,7 @@ simulation.start_simulator()
 #### In-Person Modality
 
 ```python
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.IN_PERSON,
     description='Meeting at a coffee shop',
     location='Downtown Cafe'
@@ -567,7 +567,7 @@ simulation.start_simulator()
 #### Phone Call Modality
 
 ```python
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.PHONE_CALL,
     description='Catching up on the phone'
 )
@@ -590,7 +590,7 @@ simulation.start_simulator()
 #### Video Call Modality
 
 ```python
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.VIDEO_CALL,
     description='Video catch-up call',
     context={
@@ -704,7 +704,7 @@ The flask application exposes REST endpoints for programmatic interaction:
 # Request: { "content": "Hey, how are you?", "action": "waves hello" }
 # Response: { 
 #   "response": "Hi! I'm doing well, thanks for asking! *smiles warmly*",
-#   "emotional_state": { "friendly": 0.8, "curious": 0.5 },
+#   "emotional_state": { "cheerful": 0.8, "creative": 0.5 },
 #   "triggers_activated": [],
 #   "active_mask": null
 # }
@@ -742,7 +742,7 @@ chat = simulation.create_chat_session()
 # Send messages
 response = chat.send("Hey Sarah, long time no see!")
 print(response.content)  # "Oh wow, Anthony! It's been ages!"
-print(response.emotional_state)  # {'excited': 0.7, 'happy': 0.6, ...}
+print(response.emotional_state)  # {'excited': 0.7, 'cheerful': 0.6, ...}
 
 # Send actions (for in-person/video modalities)
 response = chat.send_action("gives Sarah a friendly hug")
@@ -790,13 +790,13 @@ mike = personaut.create_individual(name="Mike")
 human = personaut.create_human(name='Anthony')
 
 # Group text message
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.TEXT_MESSAGE,
     description='Group chat planning a reunion',
     context={'group_name': 'College Crew 🎓'}
 )
 
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=situation,
     individuals=[sarah, mike, human],
     type=personaut.simulations.types.LIVE_CONVERSATION,
@@ -844,7 +844,7 @@ support_agent.add_trait(personaut.traits.create_trait(
 professional_mask = personaut.masks.create_mask(
     name='professional',
     active_by_default=True,
-    emotional_modifications={'angry': -0.8, 'frustrated': -0.6}
+    emotional_modifications={'angry': -0.8, 'hostile': -0.6}
 )
 support_agent.add_mask(professional_mask)
 
@@ -858,7 +858,7 @@ escalation_trigger = personaut.triggers.create_emotional_trigger(
 # Customer simulatio
 customer = personaut.create_human(name='Customer')
 
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.TEXT_MESSAGE,
     description='Customer support chat about a billing issue',
     context={
@@ -868,7 +868,7 @@ situation = personaut.situation.create_situation(
     }
 )
 
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=situation,
     individuals=[support_agent, customer],
     type=personaut.simulations.types.LIVE_CONVERSATION,
@@ -919,7 +919,7 @@ personaut.memory.create_shared_memory(
 # Medium trust (0.4-0.7): Cautious but open communication
 # Low trust (0.0-0.3): Guarded responses, withholds information
 
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=situation,
     individuals=[user_a, user_b],
     type=personaut.simulations.types.CONVERSATION,
@@ -1001,7 +1001,7 @@ user_a.add_trigger(trigger)
 trigger = personaut.triggers.create_situational_trigger(
     description='Dark enclosed spaces',
     physical_state_rules=[{'similarity': 0.4, 'threshold': '>'}],
-    response=personaut.emotion.EmotionalState(
+    response=personaut.emotions.EmotionalState(
         increase=['anxious', 'helpless'],
         decrease=['content', 'trusting']
     )
@@ -1137,7 +1137,7 @@ import personaut
 customer = personaut.create_individual(name="Customer")
 customer.emotional_state.change_state({
     'angry': 0.6,
-    'frustrated': 0.7,
+    'hostile': 0.7,
     'hopeful': 0.3
 })
 
@@ -1150,13 +1150,13 @@ service_rep.add_trait(personaut.traits.create_trait(
     trait=personaut.traits.EMOTIONAL_STABILITY, value=0.7
 ))
 
-situation = personaut.situation.create_situation(
+situation = personaut.create_situation(
     type=personaut.types.modality.PHONE_CALL,
     description='Customer calling about a billing error',
     context={'issue': 'Double charged for subscription'}
 )
 
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=situation,
     individuals=[customer, service_rep],
     type=personaut.simulations.types.CONVERSATION,
@@ -1192,7 +1192,7 @@ for i, profile in enumerate(personality_profiles):
 
 # Run survey for each respondent
 for respondent in respondents:
-    simulation = personaut.simulation.create_simulation(
+    simulation = personaut.create_simulation(
         situation=survey_situation,
         individuals=[respondent],
         type=personaut.simulations.types.SURVEY,
@@ -1214,13 +1214,13 @@ approaches = [
 ]
 
 for approach in approaches:
-    situation = personaut.situation.create_situation(
+    situation = personaut.create_situation(
         type=personaut.types.modality.IN_PERSON,
         description=approach['description'],
         location='Retail Store'
     )
     
-    simulation = personaut.simulation.create_simulation(
+    simulation = personaut.create_simulation(
         situation=situation,
         individuals=[customer, sales_rep],
         type=personaut.simulations.types.OUTCOME_SUMMARY,

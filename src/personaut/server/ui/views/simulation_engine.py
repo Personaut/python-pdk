@@ -836,7 +836,7 @@ def survey_fallback(individual: Individual, question: dict[str, Any]) -> str:
 
     # Calculate emotional positivity
     positive = {"cheerful", "content", "creative", "hopeful", "excited", "satisfied"}
-    negative = {"anxious", "depressed", "frustrated", "lonely", "hostile"}
+    negative = {"anxious", "depressed", "angry", "lonely", "hostile"}
     pos_sum = sum(v for k, v in emotions.items() if k in positive)
     neg_sum = sum(v for k, v in emotions.items() if k in negative)
     positivity = (pos_sum - neg_sum) / max(pos_sum + neg_sum, 0.01)
