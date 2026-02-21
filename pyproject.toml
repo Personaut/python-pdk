@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "personaut"
-version = "0.3.1"
+version = "0.3.2"
 description = "A Python SDK for creating and simulating AI personas with emotional states, personality traits, and memory"
 readme = "README.md"
 license = "Apache-2.0"

@@ -128,7 +128,9 @@ async def create_mask(
             state.persistence.save_individual(ind)
         except Exception:
             logger.warning(
-                "Failed to persist mask %s to DB", mask_id, exc_info=True,
+                "Failed to persist mask %s to DB",
+                mask_id,
+                exc_info=True,
             )
 
     logger.info(

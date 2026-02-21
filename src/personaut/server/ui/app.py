@@ -67,8 +67,9 @@ def create_ui_app(
     @app.route("/data/<path:filepath>")
     def serve_data(filepath: str) -> Any:
         """Serve portrait and video files from the data directory."""
-        from flask import abort, send_from_directory
         from pathlib import Path
+
+        from flask import abort, send_from_directory
 
         # Only allow portraits/ and videos/ subdirectories
         if not filepath.startswith(("portraits/", "videos/")):

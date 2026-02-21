@@ -490,7 +490,11 @@ def _run_outcome_tracking(
         )
         logger.info(
             "Outcome trial %d/%d (vary=%s): %s (agent) vs %s (customer)",
-            trial_idx + 1, num_trials, vary_by, agent.name, customer.name,
+            trial_idx + 1,
+            num_trials,
+            vary_by,
+            agent.name,
+            customer.name,
         )
 
         # Build situation pair (agent gets outcome goal, customer does not)
@@ -498,21 +502,39 @@ def _run_outcome_tracking(
             engine.generate_random_situation() if vary_by == "situation" else (situation, {})
         )
         enhanced_sit, grounded_sit = _build_trial_situations(
-            trial_situation, outcome_desc, scenario_context,
+            trial_situation,
+            outcome_desc,
+            scenario_context,
         )
 
         history = _run_trial_conversation(
-            [agent, customer], enhanced_sit, grounded_sit, agent, max_turns,
+            [agent, customer],
+            enhanced_sit,
+            grounded_sit,
+            agent,
+            max_turns,
         )
 
         trial_data = _collect_trial_data(
-            trial_idx, customer, history, outcome_desc, vary_by, situation_params,
+            trial_idx,
+            customer,
+            history,
+            outcome_desc,
+            vary_by,
+            situation_params,
         )
         all_trials.append(trial_data)
 
-    return jsonify(_build_outcome_response(
-        agent, outcome_desc, scenario_context, vary_by, max_turns, all_trials,
-    ))
+    return jsonify(
+        _build_outcome_response(
+            agent,
+            outcome_desc,
+            scenario_context,
+            vary_by,
+            max_turns,
+            all_trials,
+        )
+    )
 
 
 def _build_trial_situations(
@@ -525,9 +547,7 @@ def _build_trial_situations(
     context_block = f" Context: {scenario_context}." if scenario_context else ""
 
     modality_val = (
-        base_situation.modality.value
-        if hasattr(base_situation.modality, "value")
-        else str(base_situation.modality)
+        base_situation.modality.value if hasattr(base_situation.modality, "value") else str(base_situation.modality)
     )
     location = getattr(base_situation, "location", None)
 
@@ -590,7 +610,7 @@ def _clean_speaker_response(response: str, speaker_name: str, all_individuals: l
     """Strip speaker prefix and truncate at other speakers' lines."""
     name_prefix = f"{speaker_name}:"
     if response.startswith(name_prefix):
-        response = response[len(name_prefix):].strip()
+        response = response[len(name_prefix) :].strip()
 
     lines = response.split("\n")
     clean_lines = []
@@ -661,4 +681,3 @@ def _build_outcome_response(
 
 
 __all__ = ["bp"]
-

@@ -61,7 +61,7 @@ import personaut
 sarah = personaut.create_individual(
     name="Sarah",
     traits={"warmth": 0.8, "dominance": 0.4, "sensitivity": 0.7},
-    emotional_state={"cheerful": 0.6, "curious": 0.5},
+    emotional_state={"cheerful": 0.6, "creative": 0.5},
 )
 
 # Update emotional state
@@ -100,13 +100,13 @@ sarah = personaut.create_individual(name="Sarah")
 mike = personaut.create_individual(name="Mike")
 
 # Create situation
-situation = personaut.situation.create_situation(
-    type=personaut.types.modality.TEXT_MESSAGE,
+situation = personaut.create_situation(
+    modality=personaut.types.modality.TEXT_MESSAGE,
     description='Catching up after a long time'
 )
 
 # Create and run simulation
-simulation = personaut.simulation.create_simulation(
+simulation = personaut.create_simulation(
     situation=situation,
     individuals=[sarah, mike],
     type=personaut.simulations.types.CONVERSATION,
@@ -187,13 +187,15 @@ dominant, value = state.get_dominant()  # ('hopeful', 0.8)
 Based on the 16PF model with 17 traits that influence emotional transitions:
 
 ```python
-from personaut.traits import create_trait, WARMTH, EMOTIONAL_STABILITY
+import personaut
+
+individual = personaut.create_individual(name="Sarah")
 
 # High warmth = more approachable, friendly
-warmth = create_trait(trait=WARMTH, value=0.8)
+individual.set_trait("warmth", 0.8)
 
 # High emotional stability = less reactive to stress
-stability = create_trait(trait=EMOTIONAL_STABILITY, value=0.7)
+individual.set_trait("emotional_stability", 0.7)
 ```
 
 ## Memory System

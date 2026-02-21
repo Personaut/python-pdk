@@ -301,8 +301,7 @@ Output JSON only, no other text.
 
         try:
             with client.messages.stream(**gen_kwargs) as stream:
-                for text in stream.text_stream:
-                    yield text
+                yield from stream.text_stream
 
         except Exception as e:
             self._handle_error(e)

@@ -243,8 +243,9 @@ class ConversationSimulation(Simulation):
         prompt = "\n".join(prompt_parts)
 
         try:
+            assert self.llm is not None  # Caller gates on self.llm
             result = self.llm.generate(prompt, temperature=0.8, max_tokens=256)
-            return result.text.strip()
+            return result.text.strip()  # type: ignore[no-any-return]
         except Exception as exc:
             logger.warning("LLM generation failed for %s, falling back to placeholder: %s", speaker_name, exc)
             # Fall back to placeholder on error

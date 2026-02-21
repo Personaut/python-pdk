@@ -185,10 +185,7 @@ class Persistence:
                 "salience": r.get("importance", 0.5),
                 "memory_type": r.get("memory_type", "individual"),
                 "emotional_state": meta.get("emotional_state"),
-                "metadata": {
-                    k: v for k, v in meta.items()
-                    if k not in ("emotional_state", "owner_id")
-                },
+                "metadata": {k: v for k, v in meta.items() if k not in ("emotional_state", "owner_id")},
             }
             result.append(mem)
         return result

@@ -67,8 +67,7 @@ server.add_individual(sarah)
 # Start server (FastAPI backend + Flask UI)
 server.start(
     api_port=8000,      # FastAPI backend
-    ui_port=5000,       # Flask UI
-    debug=True
+    ui_port=5000        # Flask UI
 )
 
 # Access:

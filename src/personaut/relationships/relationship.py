@@ -401,8 +401,7 @@ def create_relationship(
     unique_ids = list(dict.fromkeys(individual_ids))  # preserve order, deduplicate
     if len(unique_ids) < 2:
         raise _ValidationError(
-            "Relationship requires at least 2 unique individual IDs "
-            f"(got {individual_ids!r})",
+            f"Relationship requires at least 2 unique individual IDs (got {individual_ids!r})",
             field="individual_ids",
             value=individual_ids,
         )
@@ -417,9 +416,7 @@ def create_relationship(
             # Already nested format — clamp values
             for key, value in trust.items():
                 if isinstance(value, dict):
-                    nested_trust[key] = {
-                        k: clamp_trust(v) for k, v in value.items()
-                    }
+                    nested_trust[key] = {k: clamp_trust(v) for k, v in value.items()}
         else:
             # Simple format - use as symmetric trust
             for ind_id in unique_ids:

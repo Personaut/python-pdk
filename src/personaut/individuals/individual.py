@@ -587,7 +587,7 @@ class Individual:
             masks=masks,
             triggers=triggers,
             active_mask=active_mask,
-            metadata=data.get("metadata", {}),
+            metadata=data.get("metadata") or {},
             created_at=datetime.fromisoformat(data["created_at"]),
             updated_at=datetime.fromisoformat(data.get("updated_at", data["created_at"])),
         )
@@ -654,7 +654,7 @@ def create_individual(
             try:
                 trait_profile.set_trait(trait, value)
             except Exception:
-                pass  # Skip invalid traits
+                logger.warning("Skipping invalid trait %r during creation", trait, exc_info=True)
     else:
         trait_profile = traits
 

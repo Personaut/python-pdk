@@ -452,8 +452,8 @@ context = create_coffee_shop_context(
 )
 
 # Use in simulation
-situation = personaut.situation.create_situation(
-    type=personaut.types.modality.IN_PERSON,
+situation = personaut.create_situation(
+    modality=personaut.types.modality.IN_PERSON,
     description=context.description,
     location=context.get_value("city"),
     context=context.to_dict(),  # Full situational context

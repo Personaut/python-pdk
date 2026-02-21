@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 
 from personaut.individuals.physical import PhysicalFeatures
 
@@ -252,7 +253,7 @@ def generate_portrait(
         return None
 
 
-def _get_data_dir() -> "Path":
+def _get_data_dir() -> Path:
     """Return the data directory derived from PERSONAUT_STORAGE_PATH.
 
     Falls back to ``./data`` when the env var is unset.

@@ -163,7 +163,9 @@ async def create_trigger(
             state.persistence.save_individual(ind)
         except Exception:
             logger.warning(
-                "Failed to persist trigger %s to DB", trigger_id, exc_info=True,
+                "Failed to persist trigger %s to DB",
+                trigger_id,
+                exc_info=True,
             )
 
     logger.info(

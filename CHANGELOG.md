@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-02-21
+
+### Fixed
+- **34 wrong module paths in TRAITS.md** — `personaut.trait.WARMTH` (singular) corrected to `personaut.traits.WARMTH` (plural) across all 17 trait definitions and the constants reference section.
+- **17 wrong parameter names in SIMULATIONS.md** — `create_situation(type=...)` corrected to `create_situation(modality=...)` to match the actual function signature.
+- **13 trait coefficient tables out of sync with code** — Updated all coefficient example dicts in TRAITS.md to match the actual values in `coefficients.py`. WARMTH was missing `intimate` and `hateful`; DOMINANCE, HUMILITY, LIVELINESS, SOCIAL_BOLDNESS, SENSITIVITY, VIGILANCE, PRIVATENESS, and APPREHENSION all had incorrect values.
+- **Non-existent `personaut.memory.*` dot-access in docs** — Replaced `personaut.memory.search()`, `personaut.memory.create_individual_memory()`, etc. with proper `from personaut.memory import ...` style imports in SIMULATIONS.md and PROMPTS.md. `personaut.memory.search()` → `search_memories()`.
+- **Non-existent `personaut.actions` module in docs** — Replaced `personaut.actions.ESCALATE_TO_SUPERVISOR` with `personaut.masks.STOIC_MASK` in SIMULATIONS.md.
+- **Non-existent `personaut.situation.*` path in FACTS.md** — `personaut.situation.create_situation()` → `personaut.create_situation()`.
+- **Wrong `create_relationship()` params in docs** — `individuals=[user_a, user_b]` corrected to `individual_ids=[user_a.id, user_b.id]`; trust dict keys corrected from objects to string IDs.
+- **Wrong trigger factory params in docs** — `emotional_state_rules=[...]` and `physical_state_rules=[...]` corrected to `rules=[TriggerRule(...)]` with proper `keywords` param for situational triggers.
+- **Invalid `EmotionalState` constructor in docs** — `EmotionalState(increase=[...], decrease=[...])` doesn't exist; replaced with correct `masks.GUARDED_MASK` response pattern.
+- **3 non-existent emotion names in SIMULATIONS.md code examples** — `stress` → `angry`, `fear` → `anxious`, `formal` → `hostile`.
+- **`type=` → `modality=` in PROMPTS.md and FACTS.md** — 4 additional `create_situation()` calls corrected.
+- **`from_dict()` metadata None bug** — `data.get("metadata", {})` suffers the same None-vs-absent-key issue as the memories/masks fix in v0.3.0. Changed to `data.get("metadata") or {}`.
+- **`create_individual()` silently drops invalid traits** — Bare `except: pass` replaced with `logger.warning()` for consistency with the `from_dict()` logging fix.
+- **`_version.py` was stuck at 0.1.0** — Synced to match the actual release version.
+
 ## [0.3.1] - 2026-02-21
 
 ### Fixed
@@ -69,7 +87,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prompt generation system
 - LiveInteractionServer (FastAPI + Flask)
 
-[Unreleased]: https://github.com/personaut/python-pdk/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/personaut/python-pdk/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/personaut/python-pdk/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/personaut/python-pdk/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/personaut/python-pdk/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/personaut/python-pdk/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/personaut/python-pdk/releases/tag/v0.1.0

@@ -62,7 +62,7 @@ individual.set_trait("warmth", 0.7)
 
 # Create situation context
 situation = personaut.create_situation(
-    type=personaut.types.modality.IN_PERSON,
+    modality=personaut.types.modality.IN_PERSON,
     description='Meeting a new colleague at work',
     location='Office'
 )
@@ -236,10 +236,12 @@ from personaut.prompts.components import MemoryComponent
 component = MemoryComponent()
 
 # Get relevant memories via vector search
-relevant_memories = personaut.memory.search(
-    individual=individual,
-    situation=situation,
-    limit=5
+from personaut.memory import search_memories
+
+relevant_memories = search_memories(
+    individual_id=individual.id,
+    query=situation.description,
+    limit=5,
 )
 
 text = component.format(
@@ -251,21 +253,28 @@ text = component.format(
 **Memory Types in Prompts:**
 
 ```python
+from personaut.memory import (
+    create_individual_memory,
+    create_shared_memory,
+    create_private_memory,
+)
+
 # Individual memories - personal perception
-individual_memory = personaut.memory.create_individual_memory(
-    description='First day at current job was overwhelming but exciting'
+individual_memory = create_individual_memory(
+    description='First day at current job was overwhelming but exciting',
 )
 
 # Shared memories - multiple perspectives
-shared_memory = personaut.memory.create_shared_memory(
+shared_memory = create_shared_memory(
     description='Collaborated on successful project last quarter',
-    relationships=[relationship_with_colleague]
+    individual_ids=[individual.id, colleague.id],
 )
 
 # Private memories - trust-gated
-private_memory = personaut.memory.create_private_memory(
+private_memory = create_private_memory(
+    individual_id=individual.id,
     description='Struggled with imposter syndrome for months',
-    trust_threshold=0.7
+    trust_threshold=0.7,
 )
 
 # Component respects trust thresholds
@@ -336,7 +345,7 @@ text = component.format(situation)
 ```python
 # IN_PERSON modality
 situation = personaut.create_situation(
-    type=personaut.types.modality.IN_PERSON,
+    modality=personaut.types.modality.IN_PERSON,
     description='Coffee shop meeting',
     location='Downtown Cafe'
 )
@@ -345,7 +354,7 @@ situation = personaut.create_situation(
 
 # TEXT_MESSAGE modality
 situation = personaut.create_situation(
-    type=personaut.types.modality.TEXT_MESSAGE,
+    modality=personaut.types.modality.TEXT_MESSAGE,
     description='Catching up with an old friend'
 )
 # Output: "Sarah is communicating via text message. She has time to consider 
@@ -622,9 +631,9 @@ mike.emotional_state.change_state({'proud': 0.7, 'angry': 0.5})
 mike.set_trait("dominance", 0.7)
 
 # Create shared history
-relationship = personaut.relationships.create_relationship(
-    individuals=[sarah, mike],
-    trust={sarah: 0.6, mike: 0.5}
+relationship = personaut.create_relationship(
+    individual_ids=[sarah.id, mike.id],
+    trust={sarah.id: 0.6, mike.id: 0.5},
 )
 
 # Generate prompts for each individual

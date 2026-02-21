@@ -34,7 +34,7 @@ The degree to which an individual is outgoing, kindly, and interested in others 
 ```python
 import personaut
 
-warmth = personaut.trait.WARMTH
+warmth = personaut.traits.WARMTH
 
 individual = personaut.create_individual(name="Sarah")
 individual.set_trait("warmth", 0.8)
@@ -51,7 +51,7 @@ The capacity for abstract thinking versus concrete, practical thinking.
 | Low (0.0-0.3) | Concrete thinking, practical orientation |
 
 ```python
-reasoning = personaut.trait.REASONING
+reasoning = personaut.traits.REASONING
 ```
 
 ### EMOTIONAL_STABILITY (Factor C)
@@ -65,7 +65,7 @@ The degree of emotional resilience versus reactivity to stress and negative situ
 | Low (0.0-0.3) | Reactive, emotionally sensitive, easily affected |
 
 ```python
-emotional_stability = personaut.trait.EMOTIONAL_STABILITY
+emotional_stability = personaut.traits.EMOTIONAL_STABILITY
 ```
 
 ### DOMINANCE (Factor E)
@@ -79,7 +79,7 @@ The tendency to be assertive and competitive versus deferential and accommodatin
 | Low (0.0-0.3) | Deferential, humble, yielding to others |
 
 ```python
-dominance = personaut.trait.DOMINANCE
+dominance = personaut.traits.DOMINANCE
 ```
 
 ### HUMILITY (Factor H-H)
@@ -93,7 +93,7 @@ The degree of modesty and sincerity versus arrogance and entitlement.
 | Low (0.0-0.3) | Arrogant, entitled, seeks recognition |
 
 ```python
-humility = personaut.trait.HUMILITY
+humility = personaut.traits.HUMILITY
 
 # Example: setting humility
 individual = personaut.create_individual(name="Alex")
@@ -111,7 +111,7 @@ The level of spontaneity and enthusiasm versus seriousness and restraint.
 | Low (0.0-0.3) | Serious, restrained, measured |
 
 ```python
-liveliness = personaut.trait.LIVELINESS
+liveliness = personaut.traits.LIVELINESS
 ```
 
 ### RULE_CONSCIOUSNESS (Factor G)
@@ -125,7 +125,7 @@ The degree of conscientiousness and moral adherence versus expediency.
 | Low (0.0-0.3) | Expedient, flexible with rules, pragmatic |
 
 ```python
-rule_consciousness = personaut.trait.RULE_CONSCIOUSNESS
+rule_consciousness = personaut.traits.RULE_CONSCIOUSNESS
 ```
 
 ### SOCIAL_BOLDNESS (Factor H)
@@ -139,7 +139,7 @@ The tendency to be socially venturesome versus shy and timid.
 | Low (0.0-0.3) | Shy, timid, threat-sensitive socially |
 
 ```python
-social_boldness = personaut.trait.SOCIAL_BOLDNESS
+social_boldness = personaut.traits.SOCIAL_BOLDNESS
 ```
 
 ### SENSITIVITY (Factor I)
@@ -153,7 +153,7 @@ The degree of emotional sensitivity and refinement versus utilitarian practicali
 | Low (0.0-0.3) | Utilitarian, tough-minded, practical |
 
 ```python
-sensitivity = personaut.trait.SENSITIVITY
+sensitivity = personaut.traits.SENSITIVITY
 ```
 
 ### VIGILANCE (Factor L)
@@ -167,7 +167,7 @@ The tendency to be skeptical and suspicious versus trusting and accepting.
 | Low (0.0-0.3) | Trusting, easy-going, accepting |
 
 ```python
-vigilance = personaut.trait.VIGILANCE
+vigilance = personaut.traits.VIGILANCE
 ```
 
 ### ABSTRACTEDNESS (Factor M)
@@ -181,7 +181,7 @@ The orientation toward imagination and ideas versus practical groundedness.
 | Low (0.0-0.3) | Grounded, practical, solution-oriented |
 
 ```python
-abstractedness = personaut.trait.ABSTRACTEDNESS
+abstractedness = personaut.traits.ABSTRACTEDNESS
 ```
 
 ### PRIVATENESS (Factor N)
@@ -195,7 +195,7 @@ The tendency to be discreet and polished versus forthright and genuine.
 | Low (0.0-0.3) | Forthright, genuine, open about feelings |
 
 ```python
-privateness = personaut.trait.PRIVATENESS
+privateness = personaut.traits.PRIVATENESS
 ```
 
 ### APPREHENSION (Factor O)
@@ -209,7 +209,7 @@ The tendency toward worry and self-doubt versus self-assurance.
 | Low (0.0-0.3) | Self-assured, placid, confident |
 
 ```python
-apprehension = personaut.trait.APPREHENSION
+apprehension = personaut.traits.APPREHENSION
 ```
 
 ### OPENNESS_TO_CHANGE (Factor Q1)
@@ -223,7 +223,7 @@ The willingness to experiment and embrace change versus preference for tradition
 | Low (0.0-0.3) | Traditional, conservative, prefers familiar |
 
 ```python
-openness_to_change = personaut.trait.OPENNESS_TO_CHANGE
+openness_to_change = personaut.traits.OPENNESS_TO_CHANGE
 ```
 
 ### SELF_RELIANCE (Factor Q2)
@@ -237,7 +237,7 @@ The preference for solitude and self-sufficiency versus group orientation.
 | Low (0.0-0.3) | Group-oriented, seeks belonging, affiliative |
 
 ```python
-self_reliance = personaut.trait.SELF_RELIANCE
+self_reliance = personaut.traits.SELF_RELIANCE
 ```
 
 ### PERFECTIONISM (Factor Q3)
@@ -251,7 +251,7 @@ The degree of self-discipline and orderliness versus tolerance for disorder.
 | Low (0.0-0.3) | Tolerates disorder, flexible about standards |
 
 ```python
-perfectionism = personaut.trait.PERFECTIONISM
+perfectionism = personaut.traits.PERFECTIONISM
 ```
 
 ### TENSION (Factor Q4)
@@ -265,7 +265,7 @@ The level of impatience and drive versus relaxation and tranquility.
 | Low (0.0-0.3) | Relaxed, tranquil, patient |
 
 ```python
-tension = personaut.trait.TENSION
+tension = personaut.traits.TENSION
 ```
 
 ## Trait Constants Reference
@@ -276,55 +276,55 @@ All 17 traits as defined in the Personaut PDK:
 import personaut
 
 # Higher warmth means outgoing/kindly and less means detached and more critical
-warmth = personaut.trait.WARMTH
+warmth = personaut.traits.WARMTH
 
 # Higher reasoning means abstract/higher capacity and less means concrete
-reasoning = personaut.trait.REASONING
+reasoning = personaut.traits.REASONING
 
 # Higher emotional_stability means stable/mature and less means reactive
-emotional_stability = personaut.trait.EMOTIONAL_STABILITY
+emotional_stability = personaut.traits.EMOTIONAL_STABILITY
 
 # Higher dominance means assertive/competitive and less means deferential/humble
-dominance = personaut.trait.DOMINANCE
+dominance = personaut.traits.DOMINANCE
 
 # Higher humility means modest/sincere and less means arrogant/entitled
-humility = personaut.trait.HUMILITY
+humility = personaut.traits.HUMILITY
 
 # Higher liveliness means spontaneous/enthusiastic and less means serious/restrained
-liveliness = personaut.trait.LIVELINESS
+liveliness = personaut.traits.LIVELINESS
 
 # Higher rule_consciousness means conscientious/moral and less means expedient
-rule_consciousness = personaut.trait.RULE_CONSCIOUSNESS
+rule_consciousness = personaut.traits.RULE_CONSCIOUSNESS
 
 # Higher social_boldness means venturesome/uninhibited and less means shy/timid
-social_boldness = personaut.trait.SOCIAL_BOLDNESS
+social_boldness = personaut.traits.SOCIAL_BOLDNESS
 
 # Higher sensitivity means tender-minded/refined and less means utilitarian/tough
-sensitivity = personaut.trait.SENSITIVITY
+sensitivity = personaut.traits.SENSITIVITY
 
 # Higher vigilance means skeptical/suspicious and less means trusting/easy-going
-vigilance = personaut.trait.VIGILANCE
+vigilance = personaut.traits.VIGILANCE
 
 # Higher abstractedness means imaginative/idea-oriented and less means grounded/practical
-abstractedness = personaut.trait.ABSTRACTEDNESS
+abstractedness = personaut.traits.ABSTRACTEDNESS
 
 # Higher privateness means polished/discreet and less means forthright/genuine
-privateness = personaut.trait.PRIVATENESS
+privateness = personaut.traits.PRIVATENESS
 
 # Higher apprehension means insecure/worried and less means self-assured/placid
-apprehension = personaut.trait.APPREHENSION
+apprehension = personaut.traits.APPREHENSION
 
 # Higher openness_to_change means experimenting and less means traditional/conservative
-openness_to_change = personaut.trait.OPENNESS_TO_CHANGE
+openness_to_change = personaut.traits.OPENNESS_TO_CHANGE
 
 # Higher self_reliance means solitary/resourceful and less means group-oriented
-self_reliance = personaut.trait.SELF_RELIANCE
+self_reliance = personaut.traits.SELF_RELIANCE
 
 # Higher perfectionism means self-disciplined and less means tolerates disorder
-perfectionism = personaut.trait.PERFECTIONISM
+perfectionism = personaut.traits.PERFECTIONISM
 
 # Higher tension means impatient/driven and less means relaxed/tranquil
-tension = personaut.trait.TENSION
+tension = personaut.traits.TENSION
 ```
 
 ## Creating Traits
@@ -391,10 +391,12 @@ The following table shows how each trait affects emotional transitions based on 
 warmth_coefficients = {
     'loving': 0.4,      # High warmth accelerates loving
     'trusting': 0.3,    # High warmth accelerates trusting
-    'hostile': -0.5,    # High warmth buffers hostile
     'nurturing': 0.3,   # High warmth accelerates nurturing
+    'intimate': 0.3,    # High warmth accelerates intimacy
+    'hostile': -0.5,    # High warmth buffers hostile
     'critical': -0.3,   # High warmth reduces critical
-    'lonely': -0.2      # High warmth reduces lonely
+    'lonely': -0.2,     # High warmth reduces lonely
+    'hateful': -0.4     # High warmth buffers hateful
 }
 ```
 
@@ -407,10 +409,10 @@ warmth_coefficients = {
 
 ```python
 reasoning_coefficients = {
-    'thoughtful': 0.4,
-    'confused': -0.4,
-    'helpless': -0.3,
-    'anxious': -0.2
+    'confused': -0.3,
+    'creative': 0.2,
+    'thoughtful': 0.3,
+    'helpless': -0.2
 }
 ```
 
@@ -425,19 +427,16 @@ reasoning_coefficients = {
 emotional_stability_coefficients = {
     # Fear category buffers
     'anxious': -0.5,
-    'insecure': -0.4,
-    'helpless': -0.4,
-    'rejected': -0.3,
-    'confused': -0.3,
-    'submissive': -0.2,
+    'helpless': -0.3,
+    'guilty': -0.2,
+    'ashamed': -0.2,
     # Sad category buffers
-    'depressed': -0.5,
-    'guilty': -0.3,
-    'ashamed': -0.3,
-    'lonely': -0.3,
-    'hurt': -0.4,
+    'depressed': -0.4,
+    # Anger category buffers
+    'angry': -0.3,
     # Positive stabilization
-    'content': 0.4
+    'content': 0.4,
+    'satisfied': 0.3
 }
 ```
 
@@ -450,11 +449,14 @@ emotional_stability_coefficients = {
 
 ```python
 dominance_coefficients = {
-    'proud': 0.4,
+    'proud': 0.3,
     'important': 0.3,
-    'angry': 0.2,       # When challenged
+    'respected': 0.3,
     'submissive': -0.5,
-    'appreciated': -0.2  # When guided (low dominance)
+    'helpless': -0.3,
+    'insecure': -0.3,
+    'hostile': 0.2,
+    'critical': 0.2
 }
 ```
 
@@ -467,10 +469,11 @@ dominance_coefficients = {
 
 ```python
 humility_coefficients = {
-    'faithful': 0.3,
-    'satisfied': 0.2,
-    'selfish': -0.6,    # Massive buffer
-    'important': -0.3
+    'proud': -0.3,
+    'important': -0.2,
+    'appreciated': 0.2,
+    'content': 0.2,
+    'selfish': -0.4
 }
 ```
 
@@ -483,11 +486,13 @@ humility_coefficients = {
 
 ```python
 liveliness_coefficients = {
-    'excited': 0.5,
+    'excited': 0.4,
+    'cheerful': 0.4,
     'energetic': 0.4,
-    'bored': -0.5,
-    'cheerful': 0.3,
-    'thoughtful': -0.2  # Low liveliness increases thoughtful
+    'hopeful': 0.3,
+    'bored': -0.4,
+    'apathetic': -0.4,
+    'depressed': -0.3
 }
 ```
 
@@ -516,10 +521,13 @@ rule_consciousness_coefficients = {
 
 ```python
 social_boldness_coefficients = {
-    'excited': 0.4,
-    'rejected': -0.6,   # Extreme buffer
-    'insecure': -0.5,   # Extreme buffer
-    'anxious': -0.4
+    'rejected': -0.4,
+    'insecure': -0.4,
+    'submissive': -0.3,
+    'excited': 0.2,
+    'energetic': 0.2,
+    'respected': 0.2,
+    'lonely': -0.2
 }
 ```
 
@@ -532,11 +540,13 @@ social_boldness_coefficients = {
 
 ```python
 sensitivity_coefficients = {
-    'hurt': 0.4,
-    'intimate': 0.4,
-    'nurturing': 0.3,
-    'critical': -0.3,
-    'apathetic': -0.2
+    'loving': 0.3,
+    'hurt': 0.3,
+    'intimate': 0.3,
+    'sensual': 0.3,
+    'lonely': 0.2,
+    'depressed': 0.2,
+    'creative': 0.2
 }
 ```
 
@@ -549,11 +559,11 @@ sensitivity_coefficients = {
 
 ```python
 vigilance_coefficients = {
-    'hostile': 0.4,
-    'critical': 0.3,
     'trusting': -0.5,   # Blocks trusting
-    'satisfied': -0.2,
-    'hateful': 0.2
+    'anxious': 0.3,
+    'hostile': 0.2,
+    'critical': 0.3,
+    'insecure': 0.2
 }
 ```
 
@@ -583,10 +593,10 @@ abstractedness_coefficients = {
 
 ```python
 privateness_coefficients = {
-    'intimate': -0.5,   # Hard cap
-    'trusting': -0.4,   # Hard cap
-    'hurt': -0.2,       # Stays hidden
-    'loving': -0.3
+    'intimate': -0.3,
+    'trusting': -0.2,
+    'insecure': 0.2,
+    'lonely': 0.2
 }
 ```
 
@@ -599,11 +609,14 @@ privateness_coefficients = {
 
 ```python
 apprehension_coefficients = {
-    'guilty': 0.4,
-    'ashamed': 0.4,
+    'anxious': 0.4,
+    'guilty': 0.3,
+    'ashamed': 0.3,
     'insecure': 0.4,
-    'proud': -0.4,
-    'anxious': 0.3
+    'helpless': 0.3,
+    'content': -0.3,
+    'satisfied': -0.3,
+    'proud': -0.3
 }
 ```
 
@@ -662,14 +675,15 @@ perfectionism_coefficients = {
 | Trait Level | Emotion Effects |
 |-------------|-----------------|
 | **High** | Rapid movement toward ANGRY and ANXIOUS; hard to reach CONTENT |
-| **Low** | Naturally high CONTENT and RELAXED; slow to move toward EXCITED |
+| **Low** | Naturally high CONTENT and SATISFIED; slow to move toward EXCITED |
 
 ```python
 tension_coefficients = {
-    'angry': 0.4,
     'anxious': 0.4,
-    'content': -0.5,    # Hard to reach
-    'excited': 0.2      # Low tension slows excited
+    'angry': 0.4,
+    'hostile': 0.3,
+    'content': -0.4,
+    'energetic': 0.2
 }
 ```
 
