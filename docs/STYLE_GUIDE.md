@@ -351,17 +351,14 @@ def get_trait(self, trait_name: str) -> Trait:
 ```python
 # ✅ Handle specific exceptions
 try:
-    individual.add_trait(trait)
+    individual.set_trait("warmth", value)
 except ValidationError as e:
-    logger.warning("trait=<%s> | invalid trait configuration: %s", trait.name, e)
-    raise
-except TraitNotFoundError:
-    logger.error("trait=<%s> | trait type not registered", trait.name)
+    logger.warning("trait=%s | invalid value: %s", "warmth", e)
     raise
 
 # ❌ Don't swallow exceptions silently
 try:
-    individual.add_trait(trait)
+    individual.set_trait("warmth", value)
 except Exception:
     pass  # Never do this
 
@@ -607,7 +604,7 @@ import pytest
 
 from personaut import create_individual
 from personaut.emotions import EmotionalState
-from personaut.traits import create_trait, WARMTH
+from personaut.traits import WARMTH
 
 
 @pytest.fixture
@@ -630,7 +627,7 @@ def anxious_individual():
 def warm_individual():
     """Create an individual with high warmth trait."""
     individual = create_individual(name="Test")
-    individual.add_trait(create_trait(trait=WARMTH, value=0.8))
+    individual.set_trait("warmth", 0.8)
     return individual
 ```
 

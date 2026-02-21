@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-02-21
+
+### Fixed
+- **`apply_trait_modulated_change()` ignores `TraitProfile` objects** — Method signature only accepted `dict[str, float]` but callers naturally pass `TraitProfile` objects, which lack `.items()` and `.get()`. Now auto-converts via `to_dict()` at method entry. (Issue #6)
+- **Documentation references 26 non-existent API calls** — Replaced all `add_trait(create_trait(...))` patterns with the actual `set_trait(name, value)` API across SIMULATIONS.md (8 instances), PROMPTS.md (5 instances), and TRAITS.md (13 instances). (Issue #3)
+- **Documentation shows 9 non-existent `run()` parameters** — Replaced `parallel`, `track_emotions`, `track_memories`, `save_prompts`, `max_workers`, `filename_prefix`, `include_metadata`, `on_turn`, `on_complete` with the actual run() signature and marked them as planned features. (Issue #4)
+- **Documentation shows `simulation_type` param** — Corrected to `template` (the actual parameter name) in PROMPTS.md. (Issue #4)
+- **TRAITS.md API reference table listed non-existent methods** — Replaced `create_trait()`, `create_custom_trait()`, `add_trait()`, `trait.get_coefficient()` with actual methods: `set_trait()`, `get_trait()`, `traits.to_dict()`, `get_high_traits()`, `get_low_traits()`, `get_coefficient()`, `get_traits_affecting_emotion()`, `is_valid_trait()`. (Issue #3)
+- **3 invalid emotion names in SIMULATIONS.md** — Replaced `helpful`, `patient`, `professional` (not valid emotions) with `cheerful`, `content`, `satisfied` in support agent examples. (Issue #2)
+- **`create_custom_trait()` documented as code** — Moved to Planned Feature note since it doesn't exist yet. (Issue #3)
+
 ## [0.3.0] - 2026-02-21
 
 ### Fixed

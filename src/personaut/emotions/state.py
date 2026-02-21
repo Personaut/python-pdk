@@ -17,7 +17,7 @@ Example:
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from personaut.emotions.categories import CATEGORY_EMOTIONS, EmotionCategory, get_category
 from personaut.emotions.emotion import ALL_EMOTIONS, is_valid_emotion
@@ -497,7 +497,7 @@ class EmotionalState:
     def apply_trait_modulated_change(
         self,
         raw_updates: dict[str, float],
-        trait_profile: dict[str, float] | None = None,
+        trait_profile: dict[str, float] | Any | None = None,
     ) -> None:
         """Apply emotional changes modulated by personality traits.
 
@@ -513,7 +513,8 @@ class EmotionalState:
 
         Args:
             raw_updates: Dict of emotion names to raw target values.
-            trait_profile: Dict of trait names to values (0.0-1.0).
+            trait_profile: Dict of trait names to values (0.0-1.0),
+                or a TraitProfile object (converted via to_dict()).
                 If None, applies changes with no modulation.
         """
         if not trait_profile:
@@ -522,6 +523,10 @@ class EmotionalState:
                 if emotion in self._emotions:
                     self._emotions[emotion] = max(0.0, min(1.0, target))
             return
+
+        # Normalize TraitProfile objects to plain dicts
+        if hasattr(trait_profile, "to_dict"):
+            trait_profile = trait_profile.to_dict()
 
         # Import coefficients lazily to avoid circular imports
         from personaut.traits.coefficients import get_coefficient

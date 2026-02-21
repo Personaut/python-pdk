@@ -36,12 +36,8 @@ import personaut
 
 warmth = personaut.trait.WARMTH
 
-individual = personaut.create_individual()
-individual.add_trait(personaut.traits.create_trait(
-    trait=personaut.traits.WARMTH,
-    value=0.8,
-    response='naturally friendly and engaging'
-))
+individual = personaut.create_individual(name="Sarah")
+individual.set_trait("warmth", 0.8)
 ```
 
 ### REASONING (Factor B)
@@ -99,12 +95,9 @@ The degree of modesty and sincerity versus arrogance and entitlement.
 ```python
 humility = personaut.trait.HUMILITY
 
-# Example from spec with custom response
-humility_trait = personaut.traits.create_trait(
-    trait=personaut.traits.HUMILITY,
-    value=0.8,
-    response='avoids attention'
-)
+# Example: setting humility
+individual = personaut.create_individual(name="Alex")
+individual.set_trait("humility", 0.8)
 ```
 
 ### LIVELINESS (Factor F)
@@ -336,56 +329,33 @@ tension = personaut.trait.TENSION
 
 ## Creating Traits
 
-### Basic Trait Creation
+### Basic Trait Setting
 
 ```python
 import personaut
 
-# Create a trait with just the type and value
-warmth_trait = personaut.traits.create_trait(
-    trait=personaut.traits.WARMTH,
-    value=0.8
-)
-
-individual = personaut.create_individual()
-individual.add_trait(warmth_trait)
+# Set a trait value directly
+individual = personaut.create_individual(name="Sarah")
+individual.set_trait("warmth", 0.8)
 ```
 
-### Trait with Custom Response
+### Setting Multiple Traits
 
 ```python
-# Create a trait with a custom behavioral response description
-humility_trait = personaut.traits.create_trait(
-    trait=personaut.traits.HUMILITY,
-    value=0.8,
-    response='avoids attention'
+# Set multiple traits on creation
+individual = personaut.create_individual(
+    name="Sarah",
+    traits={"warmth": 0.8, "humility": 0.7}
 )
 
-individual.add_trait(humility_trait)
+# Or set them individually
+individual.set_trait("humility", 0.8)
 ```
 
 ### Custom Traits
 
-```python
-# Create an entirely new custom trait
-custom_trait = personaut.traits.create_custom_trait(
-    name='CURIOSITY',
-    description='The drive to explore and understand new things',
-    high_description='Intensely curious, constantly exploring',
-    low_description='Prefers the known, avoids novelty',
-    emotion_coefficients={
-        'excited': 0.3,      # High curiosity increases excited
-        'bored': -0.4,       # High curiosity decreases bored
-        'anxious': 0.1,      # Slight increase in anxious (fear of unknown)
-        'creative': 0.3      # High curiosity increases creative
-    }
-)
-
-individual.add_trait(personaut.traits.create_trait(
-    trait=custom_trait,
-    value=0.7
-))
-```
+> **Planned Feature (not yet implemented):** `personaut.traits.create_custom_trait()`
+> will allow defining new trait types with custom emotion coefficients.
 
 ## Trait-Emotion Coefficients
 
@@ -722,10 +692,7 @@ def create_extrovert_profile(individual: Individual) -> None:
         (personaut.traits.PRIVATENESS, 0.2)
     ]
     for trait, value in traits:
-        individual.add_trait(personaut.traits.create_trait(
-            trait=trait,
-            value=value
-        ))
+        individual.set_trait(trait.lower(), value)
 
 def create_introvert_profile(individual: Individual) -> None:
     """Create an introverted personality profile."""
@@ -738,10 +705,7 @@ def create_introvert_profile(individual: Individual) -> None:
         (personaut.traits.ABSTRACTEDNESS, 0.7)
     ]
     for trait, value in traits:
-        individual.add_trait(personaut.traits.create_trait(
-            trait=trait,
-            value=value
-        ))
+        individual.set_trait(trait.lower(), value)
 
 def create_anxious_profile(individual: Individual) -> None:
     """Create an anxiety-prone personality profile."""
@@ -753,10 +717,7 @@ def create_anxious_profile(individual: Individual) -> None:
         (personaut.traits.SOCIAL_BOLDNESS, 0.2)
     ]
     for trait, value in traits:
-        individual.add_trait(personaut.traits.create_trait(
-            trait=trait,
-            value=value
-        ))
+        individual.set_trait(trait.lower(), value)
 
 def create_leader_profile(individual: Individual) -> None:
     """Create a leadership-oriented personality profile."""
@@ -769,10 +730,7 @@ def create_leader_profile(individual: Individual) -> None:
         (personaut.traits.TENSION, 0.5)
     ]
     for trait, value in traits:
-        individual.add_trait(personaut.traits.create_trait(
-            trait=trait,
-            value=value
-        ))
+        individual.set_trait(trait.lower(), value)
 ```
 
 ### Using Profiles
@@ -789,13 +747,15 @@ create_introvert_profile(sarah)
 
 | Method | Description |
 |--------|-------------|
-| `personaut.traits.create_trait(trait, value, response=None)` | Create a trait instance |
-| `personaut.traits.create_custom_trait(name, description, ...)` | Create a custom trait type |
-| `individual.add_trait(trait)` | Add a trait to an individual |
-| `individual.get_trait(trait_type)` | Get an individual's trait value |
-| `individual.traits` | List all traits for an individual |
-| `trait.get_coefficient(emotion)` | Get influence coefficient for an emotion |
-
+| `individual.set_trait(name, value)` | Set a trait value (0.0-1.0) |
+| `individual.get_trait(name)` | Get an individual's trait value |
+| `individual.traits` | The TraitProfile object for an individual |
+| `individual.traits.to_dict()` | Get all traits as a dict |
+| `individual.traits.get_high_traits(threshold=0.7)` | Get traits above threshold |
+| `individual.traits.get_low_traits(threshold=0.3)` | Get traits below threshold |
+| `personaut.traits.get_coefficient(trait, emotion)` | Get influence coefficient |
+| `personaut.traits.get_traits_affecting_emotion(emotion)` | Get all traits affecting an emotion |
+| `personaut.traits.is_valid_trait(name)` | Check if a trait name is valid |
 ## Best Practices
 
 ### Trait Balance
