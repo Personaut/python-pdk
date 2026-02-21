@@ -52,6 +52,9 @@ bedrock = [
 openai = [
     "openai>=1.0.0",
 ]
+anthropic = [
+    "anthropic>=0.18.0",
+]
 server = [
     "fastapi>=0.104.0",
     "uvicorn[standard]>=0.24.0",
@@ -70,7 +73,7 @@ dev = [
     "hypothesis>=6.90.0",
 ]
 all = [
-    "personaut[gemini,bedrock,openai,server,dev]",
+    "personaut[gemini,bedrock,openai,anthropic,server,dev]",
 ]
 
 [project.scripts]
@@ -196,6 +199,8 @@ module = [
     "botocore.*",
     "openai",
     "openai.*",
+    "anthropic",
+    "anthropic.*",
     "torch",
     "torch.*",
     "sentence_transformers",
