@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-02-22
+
+### Fixed
+- **Simulation engine now uses LLM for dialogue generation** (Bug I-1) — `ConversationSimulation._generate_llm_turn()` now uses `PromptManager.generate()` to build rich persona prompts incorporating traits, emotions, relationships, and memories before sending to the LLM. Previously, it built a bare-bones ad-hoc prompt that ignored the full prompt infrastructure. Without an LLM configured, a warning is now logged explaining how to enable real generation. This was the last remaining implementation bug out of the original 42.
+
 ## [0.3.3] - 2026-02-21
 
 ### Changed
@@ -93,7 +98,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prompt generation system
 - LiveInteractionServer (FastAPI + Flask)
 
-[Unreleased]: https://github.com/personaut/python-pdk/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/personaut/python-pdk/compare/v0.3.4...HEAD
+[0.3.4]: https://github.com/personaut/python-pdk/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/personaut/python-pdk/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/personaut/python-pdk/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/personaut/python-pdk/compare/v0.3.0...v0.3.1

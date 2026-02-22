@@ -146,8 +146,13 @@ class ConversationSimulation(Simulation):
                 include_actions=include_actions,
             )
 
-        # Fallback: generate a placeholder response
+        # No LLM configured — warn once and fall back to placeholder
         if turn_number == 0:
+            logger.warning(
+                "No LLM configured for simulation. "
+                "Pass llm=, provider=, or model= to create_simulation() "
+                "for persona-driven dialogue. Falling back to placeholder responses."
+            )
             # Opening line
             response = self._generate_opening(speaker_name, emotional_state, include_actions)
         else:
@@ -168,6 +173,10 @@ class ConversationSimulation(Simulation):
     ) -> str:
         """Generate a conversation turn using the LLM.
 
+        Uses PromptManager to build a rich persona prompt incorporating
+        the speaker's traits, emotions, relationships, and memories,
+        then sends it to the configured LLM.
+
         Args:
             speaker: The speaking individual.
             speaker_name: Name of the speaker.
@@ -180,48 +189,33 @@ class ConversationSimulation(Simulation):
         Returns:
             LLM-generated response text.
         """
-        # Build persona prompt
-        situation_desc = getattr(self.situation, "description", "a conversation")
-        location = getattr(self.situation, "location", None)
+        from personaut.prompts.manager import PromptManager
 
-        prompt_parts = [
-            f"You are roleplaying as {speaker_name} in the following situation: {situation_desc}.",
-        ]
-        if location:
-            prompt_parts.append(f"Location: {location}")
+        # Lazily initialize the prompt manager
+        if self._prompt_manager is None:
+            self._prompt_manager = PromptManager(default_template="conversation")
 
-        # Add emotional context
-        if emotional_state is not None:
-            emotions = {}
-            if hasattr(emotional_state, "to_dict"):
-                emotions = emotional_state.to_dict()
-            elif isinstance(emotional_state, dict):
-                emotions = emotional_state
-            active = {k: v for k, v in emotions.items() if v > 0.1}
-            if active:
-                top = sorted(active.items(), key=lambda x: -x[1])[:5]
-                desc = ", ".join(f"{e} ({v:.1f})" for e, v in top)
-                prompt_parts.append(f"{speaker_name}'s current emotional state: {desc}")
+        # Build other_participants list (everyone except the speaker)
+        other_participants = [ind for ind in self.individuals if ind is not speaker]
 
-        # Add trait context
-        if traits is not None:
-            trait_dict = {}
-            if hasattr(traits, "to_dict"):
-                trait_dict = traits.to_dict()
-            elif isinstance(traits, dict):
-                trait_dict = traits
-            notable = {k: v for k, v in trait_dict.items() if abs(v - 0.5) > 0.15}
-            if notable:
-                top = sorted(notable.items(), key=lambda x: -abs(x[1] - 0.5))[:5]
-                desc = ", ".join(f"{'high' if v > 0.5 else 'low'} {t}" for t, v in top)
-                prompt_parts.append(f"{speaker_name}'s personality: {desc}")
+        # Get speaker memories if available
+        memories = None
+        if hasattr(speaker, "get_memories"):
+            memories = speaker.get_memories(limit=5)
 
-        # Add description if available
-        description = getattr(speaker, "description", None)
-        if description:
-            prompt_parts.append(f"Character description: {description}")
+        # Generate the rich persona prompt via PromptManager
+        persona_prompt = self._prompt_manager.generate(
+            individual=speaker,
+            situation=self.situation,
+            other_participants=other_participants,
+            relationships=self.relationships if self.relationships else None,
+            memories=memories,
+            template="conversation",
+        )
 
-        # Conversation history
+        # Build the final prompt: persona context + conversation history + instruction
+        prompt_parts = [persona_prompt]
+
         if history_context:
             prompt_parts.append(f"\nConversation so far:\n{history_context}")
 
