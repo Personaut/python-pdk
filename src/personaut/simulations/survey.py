@@ -17,11 +17,16 @@ Example:
 from __future__ import annotations
 
 import json
+import logging
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
 from personaut.simulations.simulation import Simulation
 from personaut.simulations.styles import SimulationStyle
+
+
+logger = logging.getLogger(__name__)
 
 
 # Question type configurations
@@ -110,6 +115,13 @@ class SurveySimulation(Simulation):
         questions = options.get("questions", self.questions)
         include_reasoning = options.get("include_reasoning", self.include_reasoning)
 
+        if self.llm is None:
+            logger.warning(
+                "No LLM configured for survey simulation. "
+                "Pass llm=, provider=, or model= to create_simulation() "
+                "for content-aware survey responses. Falling back to placeholders."
+            )
+
         # Generate responses for each question
         responses = []
         for question in questions:
@@ -148,8 +160,15 @@ class SurveySimulation(Simulation):
         dominant_emotion = self._get_dominant_emotion(emotional_state)
         emotional_influence = self._get_emotional_influence(dominant_emotion)
 
-        # Generate response based on type
-        if question_type.startswith("likert"):
+        # If an LLM is available, use it for content-aware responses
+        if self.llm is not None:
+            response_data = self._generate_llm_response(
+                respondent=respondent,
+                question=question,
+                emotional_state=emotional_state,
+            )
+        elif question_type.startswith("likert"):
+            # Fallback: generate based on emotional positivity
             response_data = self._generate_likert_response(
                 question_type=question_type,
                 emotional_state=emotional_state,
@@ -179,6 +198,170 @@ class SurveySimulation(Simulation):
             result["emotional_influence"] = emotional_influence
 
         return result
+
+    _llm_warned: bool = False
+
+    def _generate_llm_response(
+        self,
+        respondent: Any,
+        question: dict[str, Any],
+        emotional_state: Any,
+    ) -> dict[str, Any]:
+        """Generate a survey response using the LLM.
+
+        Uses PromptManager to build a rich persona prompt, then appends
+        question-specific format instructions so the LLM returns a
+        correctly typed answer.
+
+        Args:
+            respondent: The individual responding.
+            question: Question definition with id, text, type, etc.
+            emotional_state: Respondent's emotional state.
+
+        Returns:
+            Response dictionary matching the question type.
+        """
+        from personaut.prompts.manager import PromptManager
+
+        question_text = question.get("text", "")
+        question_type = question.get("type", "open_ended")
+
+        # Build rich persona prompt via PromptManager
+        pm = PromptManager(default_template="survey")
+        persona_prompt = pm.generate(
+            individual=respondent,
+            situation=self.situation,
+            questions=[question_text],
+            template="survey",
+        )
+
+        # Append question-type specific instructions
+        if question_type.startswith("likert"):
+            config = QUESTION_TYPES.get(question_type) or QUESTION_TYPES["likert_5"]
+            min_val = config.get("min", 1)
+            max_val = config.get("max", 5)
+            instruction = (
+                f"\n\nQuestion: {question_text}\n"
+                f"Respond with a single integer from {min_val} to {max_val}. "
+                f"Consider the question content and the persona's personality/emotional state. "
+                f"Reply with ONLY the number, nothing else."
+            )
+        elif question_type == "yes_no":
+            instruction = (
+                f"\n\nQuestion: {question_text}\n"
+                "Respond with ONLY 'Yes' or 'No' based on the persona's "
+                "personality, emotional state, and the question content."
+            )
+        elif question_type == "multiple_choice":
+            options = question.get("options", [])
+            options_str = "\n".join(f"  {i + 1}. {opt}" for i, opt in enumerate(options))
+            instruction = (
+                f"\n\nQuestion: {question_text}\n"
+                f"Options:\n{options_str}\n\n"
+                "Respond with ONLY the exact text of the chosen option. "
+                "Consider the persona's personality and emotional state."
+            )
+        else:
+            # open_ended
+            instruction = (
+                f"\n\nQuestion: {question_text}\n"
+                "Respond in character with 1-3 sentences. "
+                "Your answer should reflect the persona's personality traits, "
+                "emotional state, and relevant experiences. "
+                "Reply with ONLY the answer, no preamble."
+            )
+
+        prompt = persona_prompt + instruction
+
+        try:
+            assert self.llm is not None
+            result = self.llm.generate(prompt, temperature=0.7, max_tokens=256)
+            raw = result.text.strip()
+        except Exception as exc:
+            logger.warning(
+                "LLM generation failed for survey response, falling back to placeholder: %s",
+                exc,
+            )
+            return self._generate_fallback_response(question, emotional_state)
+
+        # Parse the raw LLM response into the correct format
+        if question_type.startswith("likert"):
+            return self._parse_likert_response(raw, question_type)
+        elif question_type == "yes_no":
+            return self._parse_yes_no_response(raw)
+        elif question_type == "multiple_choice":
+            options = question.get("options", [])
+            return self._parse_multiple_choice_response(raw, options)
+        else:
+            return {"response": raw}
+
+    def _parse_likert_response(self, raw: str, question_type: str) -> dict[str, Any]:
+        """Parse an LLM response into a Likert value."""
+        config = QUESTION_TYPES.get(question_type) or QUESTION_TYPES["likert_5"]
+        min_val: int = int(config.get("min", 1))
+        max_val: int = int(config.get("max", 5))
+        labels: dict[int, str] = dict(config.get("labels", {}))
+
+        # Extract the first integer from the response
+        match = re.search(r"\d+", raw)
+        if match:
+            value = int(match.group())
+            value = max(min_val, min(max_val, value))
+        else:
+            # If parsing fails, use midpoint
+            value = round((max_val + min_val) / 2)
+
+        return {
+            "response": value,
+            "response_label": labels.get(value, str(value)),
+        }
+
+    def _parse_yes_no_response(self, raw: str) -> dict[str, Any]:
+        """Parse an LLM response into Yes/No."""
+        lowered = raw.lower().strip()
+        if lowered.startswith("yes"):
+            return {"response": "Yes"}
+        elif lowered.startswith("no"):
+            return {"response": "No"}
+        # Fallback: look for either word
+        if "yes" in lowered:
+            return {"response": "Yes"}
+        return {"response": "No"}
+
+    def _parse_multiple_choice_response(self, raw: str, options: list[str]) -> dict[str, Any]:
+        """Parse an LLM response into one of the given options."""
+        raw_lower = raw.lower().strip()
+        # Exact match first
+        for opt in options:
+            if opt.lower() == raw_lower:
+                return {"response": opt}
+        # Substring match
+        for opt in options:
+            if opt.lower() in raw_lower:
+                return {"response": opt}
+        # Number match (e.g. "1" or "2")
+        match = re.search(r"\d+", raw)
+        if match:
+            idx = int(match.group()) - 1
+            if 0 <= idx < len(options):
+                return {"response": options[idx]}
+        # Default to first option
+        return {"response": options[0] if options else None}
+
+    def _generate_fallback_response(
+        self,
+        question: dict[str, Any],
+        emotional_state: Any,
+    ) -> dict[str, Any]:
+        """Generate a fallback response when LLM fails."""
+        question_type = question.get("type", "open_ended")
+        if question_type.startswith("likert"):
+            return self._generate_likert_response(question_type, emotional_state)
+        elif question_type == "yes_no":
+            return self._generate_yes_no_response(emotional_state)
+        elif question_type == "multiple_choice":
+            return self._generate_multiple_choice_response(question.get("options", []), emotional_state)
+        return self._generate_open_response(question.get("text", ""), emotional_state)
 
     def _generate_likert_response(
         self,

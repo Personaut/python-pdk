@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-02-25
+
+### Fixed
+- **Survey simulation now uses LLM for content-aware responses** (#15) — `SurveySimulation._generate_response()` now delegates to `_generate_llm_response()` when an LLM is configured. All four question types (open-ended, Likert, yes/no, multiple choice) use `PromptManager` to build persona-aware prompts and send them to the LLM. Previously, open-ended questions returned hardcoded placeholder strings and Likert scores converged to the midpoint regardless of question content. Includes robust response parsing for each question type, with fallback to existing placeholder behavior when no LLM is configured (with a warning logged).
+
 ## [0.3.4] - 2026-02-22
 
 ### Fixed
@@ -98,7 +103,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prompt generation system
 - LiveInteractionServer (FastAPI + Flask)
 
-[Unreleased]: https://github.com/personaut/python-pdk/compare/v0.3.4...HEAD
+[Unreleased]: https://github.com/personaut/python-pdk/compare/v0.3.5...HEAD
+[0.3.5]: https://github.com/personaut/python-pdk/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/personaut/python-pdk/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/personaut/python-pdk/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/personaut/python-pdk/compare/v0.3.1...v0.3.2
